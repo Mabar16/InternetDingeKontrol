@@ -9,11 +9,11 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="devices" upperBound="-1"
         eType="#//Device" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ExternalDeclaration">
+  <eClassifiers xsi:type="ecore:EClass" name="ExternalDeclaration" eSuperTypes="#//NamedElement"/>
+  <eClassifiers xsi:type="ecore:EClass" name="NamedElement">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Config">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Config" eSuperTypes="#//NamedElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="declarations" upperBound="-1"
         eType="#//Declaration" containment="true"/>
   </eClassifiers>
@@ -21,16 +21,18 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="key" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Device">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="parent" eType="#//IoTDevice"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Device" eSuperTypes="#//NamedElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="program" eType="#//Program"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ControllerDevice" eSuperTypes="#//Device"/>
-  <eClassifiers xsi:type="ecore:EClass" name="IoTDevice" eSuperTypes="#//Device"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ControllerDevice" eSuperTypes="#//Device">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parent" eType="#//ControllerDevice"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="IoTDevice" eSuperTypes="#//Device">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parent" eType="#//IoTDevice"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Program">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="wifiStatements" eType="#//WifiStatement"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="wifiStatement" eType="#//WifiStatement"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="connectStatements" upperBound="-1"
         eType="#//ConnectStatement" containment="true"/>
@@ -41,16 +43,16 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="loops" upperBound="-1"
         eType="#//Loop" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ListenStatement">
+  <eClassifiers xsi:type="ecore:EClass" name="ListenStatement" eSuperTypes="#//NamedElement">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="ip" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="port" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="body" eType="#//ExpressionRight"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="WifiStatement">
+  <eClassifiers xsi:type="ecore:EClass" name="WifiStatement" eSuperTypes="#//NamedElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="connectionConfig" eType="#//ConnectionConfig"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ConnectStatement">
+  <eClassifiers xsi:type="ecore:EClass" name="ConnectStatement" eSuperTypes="#//NamedElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="device" eType="#//Device"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="address" eType="#//Address"
         containment="true"/>
@@ -59,15 +61,12 @@
   <eClassifiers xsi:type="ecore:EClass" name="Address">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="VarOrList">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Loop">
+  <eClassifiers xsi:type="ecore:EClass" name="VarOrList" eSuperTypes="#//NamedElement"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Loop" eSuperTypes="#//NamedElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="timeVal" eType="#//Expression"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="timeUnit" eType="#//TIMEUNIT"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="command" upperBound="-1"
         eType="#//Command" containment="true"/>
   </eClassifiers>

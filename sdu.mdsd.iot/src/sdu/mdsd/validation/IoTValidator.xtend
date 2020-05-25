@@ -9,6 +9,12 @@ import sdu.mdsd.generator.IDKModelUtil
 import javax.inject.Inject
 import sdu.mdsd.ioT.IoTPackage
 import sdu.mdsd.ioT.IoTDevice
+import sdu.mdsd.ioT.Program
+import sdu.mdsd.ioT.ControllerDevice
+import sdu.mdsd.ioT.VarOrList
+import com.google.common.collect.HashMultimap
+import sdu.mdsd.ioT.Model
+import sdu.mdsd.ioT.NamedElement
 
 /**
  * This class contains custom validation rules. 
@@ -24,8 +30,46 @@ class IoTValidator extends AbstractIoTValidator {
 	
 	@Check def checkClassHierarchy(IoTDevice d){
 		if (d.classHierarchy.contains(d)){
-			error("cycle in inheritance of device '" + d.name + "'",  IoTPackage.eINSTANCE.getDevice_Parent(),  HIERARCHY_CYCLE, d.parent.name)
+			error("cycle in inheritance of device '" + d.name + "'",  IoTPackage.eINSTANCE.getIoTDevice_Parent(),  HIERARCHY_CYCLE, d.parent.name)
 		}
 	}
 	
+	@Check def checkClassHierarchy(ControllerDevice d){
+		if (d.classHierarchy.contains(d)){
+			error("cycle in inheritance of device '" + d.name + "'",  IoTPackage.eINSTANCE.getControllerDevice_Parent(),  HIERARCHY_CYCLE, d.parent.name)
+		}
+	}
+	
+	@Check def void checkNoDuplicateVariables(Program p){
+		checkNoDuplicateElements(p.connectStatements, "variables")
+		checkNoDuplicateElements(p.variables, "connect statements")
+		checkNoDuplicateElements(p.listenStatements, "listen statements")
+		checkNoDuplicateElements(p.loops, "loops")
+	}
+	
+	@Check def void checkNoDuplicateDeclarations(Model m){
+		checkNoDuplicateElements(m.devices, "devices")
+		checkNoDuplicateElements(m.externalDeclarations, "externals")
+		checkNoDuplicateElements(m.configs, "configs")
+	}
+	
+	public static val DUPLICATE_ELEMENT = ISSUE_CODE_PREFIX + "DuplicateElement"
+	
+	def private void checkNoDuplicateElements(Iterable<? extends NamedElement> elements, String desc) {
+		val multiMap = HashMultimap.create()
+		
+		for (e : elements)
+			multiMap.put(e.name, e)
+			
+		for (entry : multiMap.asMap.entrySet) {
+			val duplicates = entry.value
+			if (duplicates.size > 1) {
+				for (d : duplicates)
+					error(
+						"Duplicate " + desc + " '" + d.name + "'", d, IoTPackage.eINSTANCE.namedElement_Name, DUPLICATE_ELEMENT
+					)
+			}
+		}
+	}
+		
 }

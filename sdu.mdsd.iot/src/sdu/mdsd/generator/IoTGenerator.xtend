@@ -82,8 +82,8 @@ class IoTGenerator extends AbstractGenerator {
 				pycom.heartbeat(False)
 			«ENDIF»
 			
-			«IF device.program.wifiStatements !== null»
-				«device.program.wifiStatements.convWifiStatement»
+			«IF device.program.wifiStatement !== null»
+				«device.program.wifiStatement.convWifiStatement»
 			«ENDIF»
 			
 			«FOR connectionStatement : device.program.connectStatements»

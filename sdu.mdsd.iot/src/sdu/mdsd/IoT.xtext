@@ -16,6 +16,9 @@ ExternalDeclaration:
 	'external' name=ID // '(' type=STRING ')' // Commented out due to not being used
 ;
 
+NamedElement:
+	ExternalDeclaration | Config | Device | VarOrList | Loop | WifiStatement | ListenStatement | ConnectStatement
+;
 
 /*
  * Configurations
@@ -65,7 +68,7 @@ IoTDevice:
 ;
 
 Program:
-	(wifiStatements=WifiStatement)?
+	(wifiStatement=WifiStatement)?
 	connectStatements+=ConnectStatement*
 	variables+=VarOrList*
 	listenStatements+=ListenStatement*
@@ -73,15 +76,15 @@ Program:
 ;
 
 ListenStatement:
-	'listen' 'on' ip=IP ':' port=INT '->' body=ExpressionRight
+	(name=ID)? 'listen' 'on' ip=IP ':' port=INT '->' body=ExpressionRight
 ;
 
 WifiStatement:
-	'setup' connectionConfig=[ConnectionConfig]
+	(name=ID)? 'setup' connectionConfig=[ConnectionConfig]
 ;
 
 ConnectStatement:
-		'connect' 'to' device=[Device] 'on' address=Address 'using' configuration=[ConnectionConfig]
+		(name=ID)? 'connect' 'to' device=[Device] 'on' address=Address 'using' configuration=[ConnectionConfig]
 ;
 
 Address:

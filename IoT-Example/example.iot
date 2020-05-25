@@ -1,12 +1,16 @@
 external median
 abstract iot device fake {
 	list lux
+	var lux2
 }
 
 //abstract
-abstract iot device LSDev extends fake{	
+abstract iot device LSDev{	
+	list lux
 	override every 100 MILLISECONDS bob{
-		read from LIGHTSENSOR -> to lux
+	}
+	
+	override every 100 MILLISECONDS bob{
 	}
 	
 	every 1 MINUTES snd{
