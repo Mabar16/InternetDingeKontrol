@@ -3,7 +3,7 @@ src-gen/
 test-bin/
 /.metadata/
 
-
+sdu.mdsd.iot/model/generated/
 
 sdu.mdsd.iot.ui/xtend-gen/
 

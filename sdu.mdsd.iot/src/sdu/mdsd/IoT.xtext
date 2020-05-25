@@ -53,13 +53,13 @@ Device:
 ;
 
 ControllerDevice:
-	'controller' 'device' name=ID '{'
+	('abstract')? 'controller' 'device' name=ID ('extends' parent=[ControllerDevice])? '{'
 		program=Program
 	'}'
 ;
 
 IoTDevice:
-	'iot' 'device' name=ID '{'
+	('abstract')? 'iot' 'device' name=ID ('extends' parent=[IoTDevice])? '{'
 		program=Program
 	'}'
 ;
@@ -96,18 +96,18 @@ VarOrList:
 ;
 
 Loop:
-	('always'|'every' timeVal=Expression timeUnit=TIMEUNIT) '{'
+	('override') ('always'|'every' timeVal=Expression timeUnit=TIMEUNIT) (name=ID)? '{'
 		command+=Command*
 	'}'
 ;
 
 TIMEUNIT:
-	{MILLISECONDS} 'MILLISECONDS' 	|
-	{SECONDS} 'SECONDS' 			|
-	{MINUTES} 'MINUTES'				|
-	{HOURS} 'HOURS'					|
-	{DAYS} 'DAYS'					|
-	{WEEKS} 'WEEKS'					
+	{MILLISECONDS} 	'MILLISECONDS' 	|
+	{SECONDS} 		'SECONDS' 		|
+	{MINUTES} 		'MINUTES'		|
+	{HOURS} 		'HOURS'			|
+	{DAYS} 			'DAYS'			|
+	{WEEKS} 		'WEEKS'					
 
 ;
 

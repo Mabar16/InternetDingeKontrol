@@ -3,6 +3,12 @@
  */
 package sdu.mdsd.validation
 
+import org.eclipse.xtext.validation.Check
+import sdu.mdsd.ioT.Device
+import sdu.mdsd.generator.IDKModelUtil
+import javax.inject.Inject
+import sdu.mdsd.ioT.IoTPackage
+import sdu.mdsd.ioT.IoTDevice
 
 /**
  * This class contains custom validation rules. 
@@ -11,15 +17,15 @@ package sdu.mdsd.validation
  */
 class IoTValidator extends AbstractIoTValidator {
 	
-//	public static val INVALID_NAME = 'invalidName'
-//
-//	@Check
-//	def checkGreetingStartsWithCapital(Greeting greeting) {
-//		if (!Character.isUpperCase(greeting.name.charAt(0))) {
-//			warning('Name should start with a capital', 
-//					IoTPackage.Literals.GREETING__NAME,
-//					INVALID_NAME)
-//		}
-//	}
+	protected static val ISSUE_CODE_PREFIX =    "sdu.mdsd.iot."
+	public static val HIERARCHY_CYCLE =     ISSUE_CODE_PREFIX + "HierarchyCycle";
+	
+	@Inject extension IDKModelUtil
+	
+	@Check def checkClassHierarchy(IoTDevice d){
+		if (d.classHierarchy.contains(d)){
+			error("cycle in inheritance of device '" + d.name + "'",  IoTPackage.eINSTANCE.getDevice_Parent(),  HIERARCHY_CYCLE, d.parent.name)
+		}
+	}
 	
 }

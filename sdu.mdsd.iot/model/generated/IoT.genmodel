@@ -24,6 +24,7 @@
     </genClasses>
     <genClasses ecoreClass="IoT.ecore#//Device">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute IoT.ecore#//Device/name"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference IoT.ecore#//Device/parent"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference IoT.ecore#//Device/program"/>
     </genClasses>
     <genClasses ecoreClass="IoT.ecore#//ControllerDevice"/>
@@ -57,6 +58,7 @@
     <genClasses ecoreClass="IoT.ecore#//Loop">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference IoT.ecore#//Loop/timeVal"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference IoT.ecore#//Loop/timeUnit"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute IoT.ecore#//Loop/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference IoT.ecore#//Loop/command"/>
     </genClasses>
     <genClasses ecoreClass="IoT.ecore#//TIMEUNIT"/>
