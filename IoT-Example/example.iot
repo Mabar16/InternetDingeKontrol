@@ -1,79 +1,74 @@
-external mean("list")
+external median
 
-connectionConfig Wifi{
-	type:WLAN
-	"ssid":"Network2GHz"
-	"password": "kalenderlys"
+//abstract
+abstract iot device LSDev {
+	list lux
+
+	setup wifi
+	connect to endpoint
 	
+	every 100 MILLISECONDS collect{
+		read from LIGHTSENSOR -> to lux
+	}
+	
+	every 1 MINUTES snd{
+		median of lux -> send to endpoint
+		clear lux
+	}
 }
 
-connectionConfig SConfig{
-	type: SERIAL
-	}
+iot device light1 extends LSDev 
+iot device light2 extends LSDev 
+iot device light3 extends LSDev 
+iot device light4 extends LSDev 
+iot device light5 extends LSDev 
+iot device light6 extends LSDev 
 
-iot device Cup {
-	setup Wifi
-	connect to Server on '0' using SConfig
+//override
+iot device light7 extends LSDev {
+	connect to endpoint2
+	override every 2 MINUTES snd{
+		median of lux -> send to endpoint2
+		clear lux
+	}
+}
+
+controller device endpoint{
+	listen on 1.1.1.1:80 -> to database 
+}
+
+controller device endpoint2{
+	listen on 1.1.1.1:800 -> to database 
+}
+
+//ignore
+abstract iot device myDev {
+	list lux
 	list temps
-	var upperBound = 10
-	var lowerBound = 2
-	var index = 1
-	var mean 
-	
-	listen on 192.168.0.30:9000 -> {
-		if(index == 1){
-			mean -> to upperBound
-			2 -> to index
-		}else{
-			mean -> to lowerBound
-			1 -> to index
-		}
-	  }
-		
-	
-	
-	
 
-	every 10 MILLISECONDS{
-		read from TEMPERATURE -> add to temps
-		
-		
+	setup wifi
+	connect to endpoint
+	
+	every 100 MILLISECONDS collect{
+		read from LIGHTSENSOR -> to lux
 	}
 	
-	every 100 MILLISECONDS {
-		mean of temps -> to mean
-		if(mean > lowerBound AND mean < upperBound){
-			LED OFF
-		}else{
-			LED ON
-		}
-		
-		read var mean -> send to Server
+	every 1 MINUTES snd{
+		median of lux -> send to endpoint
+		clear lux
 	}
 	
+	every 100 MILLISECONDS collect{
+		read from TEMPERATURE -> to temps
+	}
+	
+	every 1 MINUTES snd2{
+		median of temps -> send to endpoint
+		clear temps
+	}
 }
 
-
-controller device Server{
-	
-	connect to Cup on COM7 using SConfig
-	list items 
-	var index = 1
-	listen on 192.168.0.16:8000 -> add to items 
-	
-	
-	every 20 SECONDS{
-		if (index == 1){
-		// Coffee limits
-		
-		80 -> send to Cup
-		60 -> send to Cup
-		2 -> to index
-		} else{
-			// room temperature limits
-			40-> send to Cup
-			1-> send to Cup
-		}
-	}
-	
+iot device myDev2 extends myDev {
+	ignore snd
+	override snd {}
 }
