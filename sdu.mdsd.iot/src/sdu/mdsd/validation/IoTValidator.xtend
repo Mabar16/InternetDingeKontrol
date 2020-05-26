@@ -3,6 +3,7 @@
  */
 package sdu.mdsd.validation
 
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.validation.Check
 import sdu.mdsd.ioT.Device
 import javax.inject.Inject
@@ -14,6 +15,9 @@ import com.google.common.collect.HashMultimap
 import sdu.mdsd.ioT.Model
 import sdu.mdsd.ioT.NamedElement
 import sdu.mdsd.generator.IoTModelUtil
+import sdu.mdsd.ioT.Variable
+import sdu.mdsd.scoping.IoTScopeProvider
+import sdu.mdsd.ioT.Loop
 
 /**
  * This class contains custom validation rules. 
@@ -37,7 +41,55 @@ class IoTValidator extends AbstractIoTValidator {
 		}
 	}
 	
-	public static val WRONG_METHOD_OVERRIDE =  ISSUE_CODE_PREFIX + "WrongMethodOverride"	
+	public static val WRONG_METHOD_OVERRIDE =  ISSUE_CODE_PREFIX + "WrongMethodOverride"
+	public static val NO_SUPER_OVERRIDE =  "Override cannot be used as this device does not inherit from an abstract device."	
+	
+	@Check def checkLegalOverrides(Loop loop) {
+		val text = NodeModelUtils.getTokenText(NodeModelUtils.findActualNodeFor(loop))
+		val d = getContainingDevice(loop)
+
+		switch (d) {
+			IoTDevice: {
+				if (text.contains('override')) {
+					// Check if the parent has a loop with the same name
+					if (d.parent === null) {
+						error(
+							NO_SUPER_OVERRIDE,
+							IoTPackage.eINSTANCE.namedElement_Name,
+							WRONG_METHOD_OVERRIDE
+						)
+					}
+						if (!d.parent.program.loops.map[name].toList.contains(loop.name)) {
+							error(
+								"Super does not implement loop '" + loop.name + "'",
+								IoTPackage.eINSTANCE.namedElement_Name,
+								WRONG_METHOD_OVERRIDE
+							)
+						}
+						System.out.println("OVERRIDE"+d.parent.program.loops.map[name])
+						System.out.println("OVERRIDE"+loop.name)
+				}
+			}
+			ControllerDevice: {
+				if (text.contains('override')) {
+					// Check if the parent has a loop with the same name
+					if (d.parent === null) {
+						error(NO_SUPER_OVERRIDE,
+							IoTPackage.eINSTANCE.namedElement_Name, WRONG_METHOD_OVERRIDE)
+					}
+						if (!d.parent.program.loops.map[name].toList.contains(loop.name)) {
+							error("Super does not implement loop '" + loop.name + "'",
+								IoTPackage.eINSTANCE.namedElement_Name, WRONG_METHOD_OVERRIDE)
+						}
+				}
+			}
+		}
+	}
+	
+
+
+	public static val UNUSED_ELEMENT = ISSUE_CODE_PREFIX + "UnusedElement"
+	
 
 	
 	@Check def void checkNoDuplicateVariables(Program p){

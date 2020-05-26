@@ -13,6 +13,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="NamedElement">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NamedDeclaration"/>
   <eClassifiers xsi:type="ecore:EClass" name="Config" eSuperTypes="#//NamedElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="declarations" upperBound="-1"
         eType="#//Declaration" containment="true"/>
@@ -61,8 +62,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="Address">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="VarOrList" eSuperTypes="#//NamedElement"/>
-  <eClassifiers xsi:type="ecore:EClass" name="Loop" eSuperTypes="#//NamedElement">
+  <eClassifiers xsi:type="ecore:EClass" name="VarOrList" eSuperTypes="#//NamedElement #//NamedDeclaration"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Loop" eSuperTypes="#//NamedElement #//NamedDeclaration">
     <eStructuralFeatures xsi:type="ecore:EReference" name="timeVal" eType="#//Expression"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="timeUnit" eType="#//TIMEUNIT"

@@ -15,6 +15,7 @@
     <genClasses ecoreClass="IoT.ecore#//NamedElement">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute IoT.ecore#//NamedElement/name"/>
     </genClasses>
+    <genClasses ecoreClass="IoT.ecore#//NamedDeclaration"/>
     <genClasses ecoreClass="IoT.ecore#//Config">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference IoT.ecore#//Config/declarations"/>
     </genClasses>

@@ -20,6 +20,10 @@ NamedElement:
 	ExternalDeclaration | Config | Device | VarOrList | Loop | WifiStatement | ListenStatement | ConnectStatement
 ;
 
+NamedDeclaration:
+	VarOrList | Loop
+;
+
 /*
  * Configurations
  */
@@ -68,7 +72,7 @@ IoTDevice:
 ;
 
 Program:
-	(wifiStatement=WifiStatement)?
+	{Program} (wifiStatement=WifiStatement)?
 	connectStatements+=ConnectStatement*
 	variables+=VarOrList*
 	listenStatements+=ListenStatement*
@@ -99,9 +103,10 @@ VarOrList:
 ;
 
 Loop:
-	('override')? ('always'|'every' timeVal=Expression timeUnit=TIMEUNIT) name=ID '{'
+	('override')? name=ID ('always'|'every' timeVal=Expression timeUnit=TIMEUNIT)'{'
 		command+=Command*
 	'}'
+
 ;
 
 TIMEUNIT:

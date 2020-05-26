@@ -10,6 +10,9 @@ import org.eclipse.xtext.scoping.Scopes
 import sdu.mdsd.generator.IoTModelUtil
 import sdu.mdsd.ioT.Device
 import sdu.mdsd.ioT.IoTPackage
+import sdu.mdsd.ioT.Command
+import sdu.mdsd.ioT.ExpressionRight
+import org.eclipse.xtext.scoping.IScope
 
 /**
  * This class contains custom scoping description.
@@ -22,7 +25,7 @@ class IoTScopeProvider extends AbstractIoTScopeProvider {
 	@Inject extension IoTModelUtil
 	
 	override getScope(EObject context, EReference ref) {
-		if (ref == IoTPackage.Literals.ADD_TO_LIST__LIST){
+		if (context instanceof ExpressionRight){
 			//val add = context as AddToList
 			val device = context.getContainingDevice
 			return Scopes.scopeFor(device.program.variables, Scopes.scopeFor(device.classHierarchyVariables))
@@ -30,13 +33,12 @@ class IoTScopeProvider extends AbstractIoTScopeProvider {
 		return super.getScope(context, ref)
 	}
 	
-	def private Device getContainingDevice(EObject o){
-		if (o.eContainer instanceof Device){
-			return o.eContainer as Device
-		} else {
-			return o.eContainer.getContainingDevice
+	def getScopeForVar(EObject context) {
+		if (context instanceof ExpressionRight){
+			//val add = context as AddToList
+			val device = context.getContainingDevice
+			return Scopes.scopeFor(device.program.variables, Scopes.scopeFor(device.classHierarchyVariables))
 		}
+		return IScope.NULLSCOPE
 	}
-	
-	
 }
