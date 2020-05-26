@@ -5,16 +5,15 @@ package sdu.mdsd.validation
 
 import org.eclipse.xtext.validation.Check
 import sdu.mdsd.ioT.Device
-import sdu.mdsd.generator.IDKModelUtil
 import javax.inject.Inject
 import sdu.mdsd.ioT.IoTPackage
 import sdu.mdsd.ioT.IoTDevice
 import sdu.mdsd.ioT.Program
 import sdu.mdsd.ioT.ControllerDevice
-import sdu.mdsd.ioT.VarOrList
 import com.google.common.collect.HashMultimap
 import sdu.mdsd.ioT.Model
 import sdu.mdsd.ioT.NamedElement
+import sdu.mdsd.generator.IoTModelUtil
 
 /**
  * This class contains custom validation rules. 
@@ -26,19 +25,20 @@ class IoTValidator extends AbstractIoTValidator {
 	protected static val ISSUE_CODE_PREFIX =    "sdu.mdsd.iot."
 	public static val HIERARCHY_CYCLE =     ISSUE_CODE_PREFIX + "HierarchyCycle";
 	
-	@Inject extension IDKModelUtil
+	@Inject extension IoTModelUtil
 	
-	@Check def checkClassHierarchy(IoTDevice d){
+	@Check def checkClassHierarchy(Device d){
 		if (d.classHierarchy.contains(d)){
-			error("cycle in inheritance of device '" + d.name + "'",  IoTPackage.eINSTANCE.getIoTDevice_Parent(),  HIERARCHY_CYCLE, d.parent.name)
+			switch(d){
+				IoTDevice: error("cycle in inheritance of device '" + d.name + "'",  IoTPackage.eINSTANCE.getIoTDevice_Parent(),  HIERARCHY_CYCLE, d.parent.name)
+				ControllerDevice: error("cycle in inheritance of device '" + d.name + "'",  IoTPackage.eINSTANCE.getControllerDevice_Parent(),  HIERARCHY_CYCLE, d.parent.name)
+			}
+			
 		}
 	}
 	
-	@Check def checkClassHierarchy(ControllerDevice d){
-		if (d.classHierarchy.contains(d)){
-			error("cycle in inheritance of device '" + d.name + "'",  IoTPackage.eINSTANCE.getControllerDevice_Parent(),  HIERARCHY_CYCLE, d.parent.name)
-		}
-	}
+	public static val WRONG_METHOD_OVERRIDE =  ISSUE_CODE_PREFIX + "WrongMethodOverride"	
+
 	
 	@Check def void checkNoDuplicateVariables(Program p){
 		checkNoDuplicateElements(p.connectStatements, "variables")

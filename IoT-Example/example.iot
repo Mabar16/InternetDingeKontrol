@@ -1,76 +1,12 @@
-external median
-abstract iot device fake {
-	list lux
-	var lux2
+
+abstract iot device fake{
+	list lux2
 }
 
 //abstract
-abstract iot device LSDev{	
+iot device LSDev extends fake{	
 	list lux
 	override every 100 MILLISECONDS bob{
+		read from TEMPERATURE -> add to lux2
 	}
-	
-	override every 100 MILLISECONDS bob{
-	}
-	
-	every 1 MINUTES snd{
-		median of lux -> send to endpoint
-		clear lux
-	}
-}
-
-iot device light1 extends LSDev 
-iot device light2 extends LSDev 
-iot device light3 extends LSDev 
-iot device light4 extends LSDev 
-iot device light5 extends LSDev 
-iot device light6 extends LSDev 
-
-//override
-iot device light7 extends LSDev {
-	connect to endpoint2
-	override every 2 MINUTES snd{
-		median of lux -> send to endpoint2
-		clear lux
-	}
-}
-
-controller device endpoint{
-	listen on 1.1.1.1:80 -> to database 
-}
-
-controller device endpoint2{
-	listen on 1.1.1.1:800 -> to database 
-}
-
-//ignore
-abstract iot device myDev {
-	list lux
-	list temps
-
-	setup wifi
-	connect to endpoint
-	
-	every 100 MILLISECONDS collect{
-		read from LIGHTSENSOR -> to lux
-	}
-	
-	every 1 MINUTES snd{
-		median of lux -> send to endpoint
-		clear lux
-	}
-	
-	every 100 MILLISECONDS collect{
-		read from TEMPERATURE -> to temps
-	}
-	
-	every 1 MINUTES snd2{
-		median of temps -> send to endpoint
-		clear temps
-	}
-}
-
-iot device myDev2 extends myDev {
-	ignore snd
-	override snd {}
 }

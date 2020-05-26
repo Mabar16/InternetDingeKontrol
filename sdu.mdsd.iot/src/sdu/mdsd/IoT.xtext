@@ -99,7 +99,7 @@ VarOrList:
 ;
 
 Loop:
-	('override') ('always'|'every' timeVal=Expression timeUnit=TIMEUNIT) (name=ID)? '{'
+	('override')? ('always'|'every' timeVal=Expression timeUnit=TIMEUNIT) name=ID '{'
 		command+=Command*
 	'}'
 ;

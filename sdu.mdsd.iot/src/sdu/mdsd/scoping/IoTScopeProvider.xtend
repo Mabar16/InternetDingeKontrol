@@ -3,6 +3,13 @@
  */
 package sdu.mdsd.scoping
 
+import javax.inject.Inject
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EReference
+import org.eclipse.xtext.scoping.Scopes
+import sdu.mdsd.generator.IoTModelUtil
+import sdu.mdsd.ioT.Device
+import sdu.mdsd.ioT.IoTPackage
 
 /**
  * This class contains custom scoping description.
@@ -11,5 +18,25 @@ package sdu.mdsd.scoping
  * on how and when to use it.
  */
 class IoTScopeProvider extends AbstractIoTScopeProvider {
-
+		
+	@Inject extension IoTModelUtil
+	
+	override getScope(EObject context, EReference ref) {
+		if (ref == IoTPackage.Literals.ADD_TO_LIST__LIST){
+			//val add = context as AddToList
+			val device = context.getContainingDevice
+			return Scopes.scopeFor(device.program.variables, Scopes.scopeFor(device.classHierarchyVariables))
+		}
+		return super.getScope(context, ref)
+	}
+	
+	def private Device getContainingDevice(EObject o){
+		if (o.eContainer instanceof Device){
+			return o.eContainer as Device
+		} else {
+			return o.eContainer.getContainingDevice
+		}
+	}
+	
+	
 }
