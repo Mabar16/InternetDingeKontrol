@@ -35,8 +35,8 @@ class IoTGenerator extends AbstractGenerator {
 		// var model = resource.allContents.filter(Model).toList
 		_resource = resource
 		for (dev : resource.allContents.filter(Device).toList) {
-
-			fsa.generateFile('''«dev.name»/main.py''', dev.convDevice)
+			if (dev.abstract === null)
+				fsa.generateFile('''«dev.name»/main.py''', dev.convDevice)
 		}
 	}
 
@@ -51,13 +51,58 @@ class IoTGenerator extends AbstractGenerator {
 		return names
 	}
 
-	def dispatch convDevice(IoTDevice device) {
-		currentDevice = device;
-		var loopTexts = new ArrayList<CharSequence>();
-		for (var i = 0; i < device.program.loops.length; i++) {
-			val text = device.program.loops.get(i).convLoop(i);
-			loopTexts.add(text)
+	def inheritLoopsFromParents(IoTDevice d){
+		var loopMap = new HashMap<String, Loop>()
+		val parent = d.parent
+		
+		for(l : parent.program.loops){
+			loopMap.put(l.name, l)
 		}
+		
+		return loopMap
+	}
+	
+	def makeLoopMap(IoTDevice d){
+		var loopMap = d.parent === null ? new HashMap<String, Loop>() : d.inheritLoopsFromParents;
+		for(l : d.program.loops){
+			if (!loopMap.containsKey(l.name)){
+				loopMap.put(l.name, l)
+				}
+			else {
+				loopMap.replace(l.name, l)
+			}
+		}
+		return loopMap
+	}
+	
+	def inheritVariablesFromParents(IoTDevice d){
+		var varMap = new HashMap<String, VarOrList>()
+		val parent = d.parent
+		
+		for(v : parent.program.variables){
+			varMap.put(v.name, v)
+		}
+		
+		return varMap
+	}
+	
+	def makeVarMap(IoTDevice d){
+		var varMap = d.parent === null ? new HashMap<String, VarOrList>() : d.inheritVariablesFromParents;
+		for(v : d.program.variables){
+			if (!varMap.containsKey(v.name)){
+				varMap.put(v.name, v)
+				}
+			else {
+				varMap.replace(v.name, v)
+			}
+		}
+		return varMap
+	}
+	
+	def dispatch convDevice(IoTDevice device) {
+		//currentDevice = device;
+		var varMap = device.makeVarMap
+		var loopMap = device.makeLoopMap
 		var sensorInits = device.eResource.allContents.filter(SENSOR).toList.convertSensorInitCode
 
 		// Used to detect which device to send commands to
@@ -99,14 +144,14 @@ class IoTGenerator extends AbstractGenerator {
 				«ENDIF»
 			«ENDFOR»
 			
-			«FOR v : device.program.variables»
+			«FOR v : varMap.values»
 				«v.convToPy»
 			«ENDFOR»
 			
 			«sensorInits»
 			
-			«FOR t : loopTexts»
-				«t»
+			«FOR l : loopMap.values»
+				«l.convLoop»
 			«ENDFOR»
 			
 			«insertSocketCode(listenStatements)»
@@ -155,19 +200,19 @@ class IoTGenerator extends AbstractGenerator {
 
 	}
 
-	def CharSequence convLoop(Loop loop, int i) {
+	def CharSequence convLoop(Loop loop) {
 		'''
-			def th_func«i»(action):
+			def th_func«loop.name»(action):
 				while True:
 					time.sleep(«loop.convertSleepTime»)
 					action()
 					
-			def loop«i»():
+			def loop«loop.name»():
 				«FOR cmd : loop.command»
 					«cmd.convCMD()»
 				«ENDFOR»
 			
-			_thread.start_new_thread(th_func«i», (loop«i»,))
+			_thread.start_new_thread(th_func«loop.name», (loop«loop.name»,))
 		'''
 
 		
@@ -367,7 +412,7 @@ class IoTGenerator extends AbstractGenerator {
 		currentDevice = device;
 		var loopTexts = new ArrayList<CharSequence>();
 		for (var i = 0; i < device.program.loops.length; i++) {
-			val text = device.program.loops.get(i).convLoop(i);
+			val text = device.program.loops.get(i).convLoop;
 			loopTexts.add(text)
 		}
 		var listenStatements = device.eAllContents.filter(ListenStatement).toList

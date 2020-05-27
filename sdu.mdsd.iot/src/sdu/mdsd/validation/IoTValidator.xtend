@@ -45,46 +45,39 @@ class IoTValidator extends AbstractIoTValidator {
 	public static val NO_SUPER_OVERRIDE =  "Override cannot be used as this device does not inherit from an abstract device."	
 	
 	@Check def checkLegalOverrides(Loop loop) {
-		val text = NodeModelUtils.getTokenText(NodeModelUtils.findActualNodeFor(loop))
+		if(loop.getOverride !== null){
 		val d = getContainingDevice(loop)
-
 		switch (d) {
 			IoTDevice: {
-				if (text.contains('override')) {
-					// Check if the parent has a loop with the same name
-					if (d.parent === null) {
-						error(
-							NO_SUPER_OVERRIDE,
-							IoTPackage.eINSTANCE.namedElement_Name,
-							WRONG_METHOD_OVERRIDE
-						)
-					}
-						if (!d.parent.program.loops.map[name].toList.contains(loop.name)) {
-							error(
-								"Super does not implement loop '" + loop.name + "'",
-								IoTPackage.eINSTANCE.namedElement_Name,
-								WRONG_METHOD_OVERRIDE
-							)
-						}
-						System.out.println("OVERRIDE"+d.parent.program.loops.map[name])
-						System.out.println("OVERRIDE"+loop.name)
+				// Check if the parent has a loop with the same name
+				if (d.parent === null) {
+					error(
+						NO_SUPER_OVERRIDE,
+						IoTPackage.eINSTANCE.namedElement_Name,
+						WRONG_METHOD_OVERRIDE
+					)
+				}
+				if (!d.parent.program.loops.map[name].toList.contains(loop.name)) {
+					error(
+						"Super does not implement loop '" + loop.name + "'",
+						IoTPackage.eINSTANCE.namedElement_Name,
+						WRONG_METHOD_OVERRIDE
+					)
 				}
 			}
 			ControllerDevice: {
-				if (text.contains('override')) {
-					// Check if the parent has a loop with the same name
-					if (d.parent === null) {
-						error(NO_SUPER_OVERRIDE,
-							IoTPackage.eINSTANCE.namedElement_Name, WRONG_METHOD_OVERRIDE)
-					}
-						if (!d.parent.program.loops.map[name].toList.contains(loop.name)) {
-							error("Super does not implement loop '" + loop.name + "'",
-								IoTPackage.eINSTANCE.namedElement_Name, WRONG_METHOD_OVERRIDE)
-						}
+				// Check if the parent has a loop with the same name
+				if (d.parent === null) {
+					error(NO_SUPER_OVERRIDE, IoTPackage.eINSTANCE.namedElement_Name, WRONG_METHOD_OVERRIDE)
+				}
+				if (!d.parent.program.loops.map[name].toList.contains(loop.name)) {
+					error("Super does not implement loop '" + loop.name + "'", IoTPackage.eINSTANCE.namedElement_Name,
+						WRONG_METHOD_OVERRIDE)
 				}
 			}
 		}
 	}
+}
 	
 
 

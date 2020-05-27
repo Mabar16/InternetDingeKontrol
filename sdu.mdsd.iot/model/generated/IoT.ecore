@@ -23,14 +23,9 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Device" eSuperTypes="#//NamedElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="abstract" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="program" eType="#//Program"
         containment="true"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ControllerDevice" eSuperTypes="#//Device">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="parent" eType="#//ControllerDevice"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="IoTDevice" eSuperTypes="#//Device">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="parent" eType="#//IoTDevice"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Program">
     <eStructuralFeatures xsi:type="ecore:EReference" name="wifiStatement" eType="#//WifiStatement"
@@ -64,6 +59,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="VarOrList" eSuperTypes="#//NamedElement #//NamedDeclaration"/>
   <eClassifiers xsi:type="ecore:EClass" name="Loop" eSuperTypes="#//NamedElement #//NamedDeclaration">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="override" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="timeVal" eType="#//Expression"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="timeUnit" eType="#//TIMEUNIT"
@@ -118,6 +114,12 @@
   <eClassifiers xsi:type="ecore:EClass" name="DeviceConfig" eSuperTypes="#//Config"/>
   <eClassifiers xsi:type="ecore:EClass" name="ConnectionConfig" eSuperTypes="#//Config">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ControllerDevice" eSuperTypes="#//Device">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parent" eType="#//ControllerDevice"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="IoTDevice" eSuperTypes="#//Device">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parent" eType="#//IoTDevice"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="IpAddress" eSuperTypes="#//Address"/>
   <eClassifiers xsi:type="ecore:EClass" name="WindowsSerialAddress" eSuperTypes="#//Address"/>

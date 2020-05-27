@@ -59,14 +59,14 @@ Device:
 	IoTDevice | ControllerDevice
 ;
 
-ControllerDevice:
-	('abstract')? 'controller' 'device' name=ID ('extends' parent=[ControllerDevice])? '{'
+ControllerDevice returns Device:
+	{ControllerDevice} (abstract='abstract')? 'controller' 'device' name=ID ('extends' parent=[ControllerDevice])? '{'
 		program=Program
 	'}'
 ;
 
-IoTDevice:
-	('abstract')? 'iot' 'device' name=ID ('extends' parent=[IoTDevice])? '{'
+IoTDevice returns Device:
+	{IoTDevice} (abstract='abstract')? 'iot' 'device' name=ID ('extends' parent=[IoTDevice])? '{'
 		program=Program
 	'}'
 ;
@@ -103,7 +103,7 @@ VarOrList:
 ;
 
 Loop:
-	('override')? name=ID ('always'|'every' timeVal=Expression timeUnit=TIMEUNIT)'{'
+	(override='override')? name=ID ('always'|'every' timeVal=Expression timeUnit=TIMEUNIT)'{'
 		command+=Command*
 	'}'
 

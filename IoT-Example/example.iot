@@ -4,6 +4,10 @@ abstract iot device fake{
 	lu every 100 MILLISECONDS{
 		read from TEMPERATURE -> add to lux2
 	}
+	
+	lulu every 100 MILLISECONDS{
+		read from TEMPERATURE -> add to lux2
+	}
 }
 
 
