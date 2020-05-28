@@ -20,6 +20,8 @@ import sdu.mdsd.ioT.Device
 import sdu.mdsd.services.IoTGrammarAccess.SendCommandElements
 import java.util.Map
 import sdu.mdsd.ioT.Loop
+import sdu.mdsd.generator.IoTInheritanceUtil;
+import javax.inject.Inject
 
 /**
  * Generates code from your model files on save.
@@ -51,53 +53,8 @@ class IoTGenerator extends AbstractGenerator {
 		return names
 	}
 
-	def inheritLoopsFromParents(IoTDevice d){
-		var loopMap = new HashMap<String, Loop>()
-		val parent = d.parent
-		
-		for(l : parent.program.loops){
-			loopMap.put(l.name, l)
-		}
-		
-		return loopMap
-	}
 	
-	def makeLoopMap(IoTDevice d){
-		var loopMap = d.parent === null ? new HashMap<String, Loop>() : d.inheritLoopsFromParents;
-		for(l : d.program.loops){
-			if (!loopMap.containsKey(l.name)){
-				loopMap.put(l.name, l)
-				}
-			else {
-				loopMap.replace(l.name, l)
-			}
-		}
-		return loopMap
-	}
-	
-	def inheritVariablesFromParents(IoTDevice d){
-		var varMap = new HashMap<String, VarOrList>()
-		val parent = d.parent
-		
-		for(v : parent.program.variables){
-			varMap.put(v.name, v)
-		}
-		
-		return varMap
-	}
-	
-	def makeVarMap(IoTDevice d){
-		var varMap = d.parent === null ? new HashMap<String, VarOrList>() : d.inheritVariablesFromParents;
-		for(v : d.program.variables){
-			if (!varMap.containsKey(v.name)){
-				varMap.put(v.name, v)
-				}
-			else {
-				varMap.replace(v.name, v)
-			}
-		}
-		return varMap
-	}
+	@Inject extension IoTInheritanceUtil
 	
 	def dispatch convDevice(IoTDevice device) {
 		//currentDevice = device;
@@ -409,12 +366,8 @@ class IoTGenerator extends AbstractGenerator {
 	}
 
 	def dispatch convDevice(ControllerDevice device) {
-		currentDevice = device;
-		var loopTexts = new ArrayList<CharSequence>();
-		for (var i = 0; i < device.program.loops.length; i++) {
-			val text = device.program.loops.get(i).convLoop;
-			loopTexts.add(text)
-		}
+		var varMap = device.makeVarMap
+		var loopMap = device.makeLoopMap
 		var listenStatements = device.eAllContents.filter(ListenStatement).toList
 		
 		// Used to detect which device to send commands to
@@ -448,12 +401,12 @@ class IoTGenerator extends AbstractGenerator {
 			«ENDFOR»
 			
 			
-			«FOR v : device.program.variables»
+			«FOR v : varMap.values»
 				«v.convToPy»
 			«ENDFOR»
 			
-			«FOR t : loopTexts»
-				«t»
+			«FOR t : loopMap.values»
+				«t.convLoop»
 			«ENDFOR»
 			
 			«insertSocketCode(listenStatements)»
