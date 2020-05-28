@@ -104,7 +104,7 @@ VarOrList:
 
 Loop:
 	(override='override')? name=ID ('always'|'every' timeVal=Expression timeUnit=TIMEUNIT)'{'
-		command+=Command*
+		commands+=Command*
 	'}'
 
 ;

@@ -29,11 +29,11 @@ class IoTInheritanceUtil {
 		return varMap
 	}
 	
-	private def dispatch getParentDevice(IoTDevice d){
+	def dispatch getParentDevice(IoTDevice d){
 		return d.parent
 	}
 	
-	private def dispatch getParentDevice(ControllerDevice d){
+	def dispatch getParentDevice(ControllerDevice d){
 		return d.parent
 	}
 	

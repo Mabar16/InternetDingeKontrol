@@ -55,7 +55,7 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute IoT.ecore#//Loop/override"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference IoT.ecore#//Loop/timeVal"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference IoT.ecore#//Loop/timeUnit"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference IoT.ecore#//Loop/command"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference IoT.ecore#//Loop/commands"/>
     </genClasses>
     <genClasses ecoreClass="IoT.ecore#//TIMEUNIT"/>
     <genClasses ecoreClass="IoT.ecore#//Command"/>

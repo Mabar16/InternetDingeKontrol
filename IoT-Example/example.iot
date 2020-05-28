@@ -1,27 +1,37 @@
 
 abstract iot device fake{
-	list lux2
+	list lux
 	lu every 100 MILLISECONDS{
-		read from TEMPERATURE -> add to lux2
+		read from TEMPERATURE -> add to lux
 	}
 	
 	lulu every 100 MILLISECONDS{
-		read from TEMPERATURE -> add to lux2
+		read from TEMPERATURE -> add to lux
 	}
 }
 
 
 abstract iot device fake2 extends fake{
-	list lux3
 	samplemp2 every 100 MILLISECONDS{
-		read from TEMPERATURE -> add to lux2
+		read from TEMPERATURE -> add to lux
 	}
 }
 
-iot device LSDev extends fake{	
-	list lux
+iot device LSDev extends fake{		
+
+}
+
+
+abstract controller device con1{
+	list bobby
 	
-	override lu every 100 MILLISECONDS{
-		read from TEMPERATURE -> add to lux2
+	hello every 1 MINUTES{
+		
+	}
+}
+
+controller device con2 extends con1{	
+	override hello every 1 MINUTES{
+		
 	}
 }

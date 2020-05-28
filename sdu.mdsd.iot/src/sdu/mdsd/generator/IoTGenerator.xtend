@@ -158,23 +158,24 @@ class IoTGenerator extends AbstractGenerator {
 	}
 
 	def CharSequence convLoop(Loop loop) {
-		'''
-			def th_func«loop.name»(action):
-				while True:
-					time.sleep(«loop.convertSleepTime»)
-					action()
-					
-			def loop«loop.name»():
-				«FOR cmd : loop.command»
-					«cmd.convCMD()»
-				«ENDFOR»
-			
-			_thread.start_new_thread(th_func«loop.name», (loop«loop.name»,))
-		'''
-
-		
-
+		if (loop.commands !== null && loop.commands.size > 0) {
+			'''
+				def th_func«loop.name»(action):
+					while True:
+						time.sleep(«loop.convertSleepTime»)
+						action()
+						
+				def loop«loop.name»():
+					«FOR cmd : loop.commands»
+						«cmd.convCMD()»
+					«ENDFOR»
+				
+				_thread.start_new_thread(th_func«loop.name», (loop«loop.name»,))
+			'''
+		} else
+			''''''
 	}
+	
 
 	def String convertSleepTime(Loop loop) {
 		if (loop.timeVal === null) {

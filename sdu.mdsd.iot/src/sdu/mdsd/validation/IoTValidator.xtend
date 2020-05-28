@@ -16,8 +16,9 @@ import sdu.mdsd.ioT.Model
 import sdu.mdsd.ioT.NamedElement
 import sdu.mdsd.generator.IoTModelUtil
 import sdu.mdsd.ioT.Variable
-import sdu.mdsd.scoping.IoTScopeProvider
 import sdu.mdsd.ioT.Loop
+import sdu.mdsd.generator.IoTInheritanceUtil
+import sdu.mdsd.ioT.VarOrList
 
 /**
  * This class contains custom validation rules. 
@@ -30,6 +31,7 @@ class IoTValidator extends AbstractIoTValidator {
 	public static val HIERARCHY_CYCLE =     ISSUE_CODE_PREFIX + "HierarchyCycle";
 	
 	@Inject extension IoTModelUtil
+	@Inject extension IoTInheritanceUtil
 	
 	@Check def checkClassHierarchy(Device d){
 		if (d.classHierarchy.contains(d)){
@@ -45,39 +47,46 @@ class IoTValidator extends AbstractIoTValidator {
 	public static val NO_SUPER_OVERRIDE =  "Override cannot be used as this device does not inherit from an abstract device."	
 	
 	@Check def checkLegalOverrides(Loop loop) {
-		if(loop.getOverride !== null){
 		val d = getContainingDevice(loop)
-		switch (d) {
-			IoTDevice: {
-				// Check if the parent has a loop with the same name
-				if (d.parent === null) {
-					error(
-						NO_SUPER_OVERRIDE,
-						IoTPackage.eINSTANCE.namedElement_Name,
-						WRONG_METHOD_OVERRIDE
-					)
-				}
-				if (!d.parent.program.loops.map[name].toList.contains(loop.name)) {
-					error(
-						"Super does not implement loop '" + loop.name + "'",
-						IoTPackage.eINSTANCE.namedElement_Name,
-						WRONG_METHOD_OVERRIDE
-					)
-				}
+		val parent = d.getParentDevice
+		// Check if the parent has a loop with the same name
+		if (parent === null && loop.getOverride !== null) {
+			error(
+				NO_SUPER_OVERRIDE,
+				IoTPackage.eINSTANCE.namedElement_Name,
+				WRONG_METHOD_OVERRIDE
+			)
+		}
+		if (parent !== null) {
+			if (!parent.program.loops.map[name].toList.contains(loop.name) && loop.getOverride !== null) {
+				error(
+					"Super does not implement loop '" + loop.name + "'",
+					IoTPackage.eINSTANCE.namedElement_Name,
+					WRONG_METHOD_OVERRIDE
+				)
+
 			}
-			ControllerDevice: {
-				// Check if the parent has a loop with the same name
-				if (d.parent === null) {
-					error(NO_SUPER_OVERRIDE, IoTPackage.eINSTANCE.namedElement_Name, WRONG_METHOD_OVERRIDE)
-				}
-				if (!d.parent.program.loops.map[name].toList.contains(loop.name)) {
-					error("Super does not implement loop '" + loop.name + "'", IoTPackage.eINSTANCE.namedElement_Name,
-						WRONG_METHOD_OVERRIDE)
-				}
+			if (parent.program.loops.map[name].toList.contains(loop.name) && loop.getOverride === null) {
+				error("Super implements loop with same name as '" + loop.name + "'. Use override keyword.",
+					IoTPackage.eINSTANCE.namedElement_Name, WRONG_METHOD_OVERRIDE)
+			}
+		}
+
+	}
+	
+	@Check def duplicateNameForInheritedVariables(VarOrList v) {
+		val d = getContainingDevice(v)
+		val parent = d.getParentDevice
+
+		if (parent !== null) {
+			if (parent.program.variables.map[name].toList.contains(v.name)) {
+				error("Super already implements a variable named '" + v.name + "'.",
+					IoTPackage.eINSTANCE.namedElement_Name, DUPLICATE_ELEMENT)
 			}
 		}
 	}
-}
+
+
 	
 
 
@@ -97,6 +106,9 @@ class IoTValidator extends AbstractIoTValidator {
 		checkNoDuplicateElements(m.externalDeclarations, "externals")
 		checkNoDuplicateElements(m.configs, "configs")
 	}
+	
+	
+	//Check duplicate inherited element
 	
 	public static val DUPLICATE_ELEMENT = ISSUE_CODE_PREFIX + "DuplicateElement"
 	

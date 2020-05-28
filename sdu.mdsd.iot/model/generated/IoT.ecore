@@ -64,7 +64,7 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="timeUnit" eType="#//TIMEUNIT"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="command" upperBound="-1"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="commands" upperBound="-1"
         eType="#//Command" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TIMEUNIT"/>
