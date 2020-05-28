@@ -55,11 +55,25 @@ class IoTGenerator extends AbstractGenerator {
 
 	
 	@Inject extension IoTInheritanceUtil
+
+	def getWifiStatement(Device d){
+		if (d.program.wifiStatement !== null){
+			return d.program.wifiStatement
+		} else if (d.parentDevice?.program.wifiStatement !== null){
+			return d.parentDevice.program.wifiStatement
+		} else {
+			return null
+		}
+	}
+	
 	
 	def dispatch convDevice(IoTDevice device) {
 		//currentDevice = device;
 		var varMap = device.makeVarMap
 		var loopMap = device.makeLoopMap
+		var wifiStatement = device.getWifiStatement
+		var connectStatementsMap = device.makeConnectionsMap
+		
 		var sensorInits = device.eResource.allContents.filter(SENSOR).toList.convertSensorInitCode
 
 		// Used to detect which device to send commands to
@@ -84,11 +98,11 @@ class IoTGenerator extends AbstractGenerator {
 				pycom.heartbeat(False)
 			«ENDIF»
 			
-			«IF device.program.wifiStatement !== null»
-				«device.program.wifiStatement.convWifiStatement»
+			«IF wifiStatement !== null»
+				«wifiStatement.convWifiStatement»
 			«ENDIF»
 			
-			«FOR connectionStatement : device.program.connectStatements»
+			«FOR connectionStatement : connectStatementsMap.values»
 				«connectionStatement.convConfigurationIoT»	
 				
 			«ENDFOR»

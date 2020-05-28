@@ -1,33 +1,25 @@
 package sdu.mdsd.generator
 
 import sdu.mdsd.ioT.Device
-import sdu.mdsd.ioT.IoTDevice
-import sdu.mdsd.ioT.ControllerDevice
 import sdu.mdsd.ioT.NamedDeclaration
 import org.eclipse.emf.ecore.EObject
+import javax.inject.Inject
 
 class IoTModelUtil {
+	
+	@Inject extension IoTInheritanceUtil
+	
 	def classHierarchy(Device d) {
-		switch(d){
-			IoTDevice: {
-				val visited = newLinkedHashSet()
-				var current = d.parent
-				while (current !== null && !visited.contains(current)) {
-					visited.add(current)
-					current = current.parent
-				}
-				visited	}
-			ControllerDevice: {
-				val visited = newLinkedHashSet()
-				var current = d.parent
-				while (current !== null && !visited.contains(current)) {
-					visited.add(current)
-					current = current.parent
-				}
-				visited}
-			}
+		val visited = newLinkedHashSet()
+		var current = d.getParentDevice
+		while (current !== null && !visited.contains(current)) {
+			visited.add(current)
+			current = current.getParentDevice
 		}
-        
+		visited
+
+	}
+
     def classHierarchyVariables(Device d){
     	d.classHierarchy.map[program.eAllContents.filter(NamedDeclaration).toList].flatten
     }

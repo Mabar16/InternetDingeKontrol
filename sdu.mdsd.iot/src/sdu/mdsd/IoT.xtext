@@ -17,11 +17,11 @@ ExternalDeclaration:
 ;
 
 NamedElement:
-	ExternalDeclaration | Config | Device | VarOrList | Loop | WifiStatement | ListenStatement | ConnectStatement
+	Config | Device | VarOrList | Loop | WifiStatement | ListenStatement | ConnectStatement
 ;
 
 NamedDeclaration:
-	VarOrList | Loop
+	VarOrList | Loop | ConnectStatement
 ;
 
 /*
@@ -88,13 +88,13 @@ WifiStatement:
 ;
 
 ConnectStatement:
-		(name=ID)? 'connect' 'to' device=[Device] 'on' address=Address 'using' configuration=[ConnectionConfig]
+		name=ID 'connect' 'to' device=[Device] 'on' address=Address 'using' configuration=[ConnectionConfig]
 ;
 
 Address:
 	{IpAddress} value=IP | 
 	{WindowsSerialAddress} value=WINDOWS_SERIAL | 
-	{UnixSerialAddress} value=STRING // TODO: validation
+	{UnixSerialAddress} value=STRING
 ;
 
 
