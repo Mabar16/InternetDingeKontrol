@@ -3,16 +3,19 @@
  */
 package sdu.mdsd.generator
 
+import java.util.ArrayList
+import java.util.HashMap
+import java.util.HashSet
+import java.util.List
+import java.util.UUID
+import javax.inject.Inject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
-import java.util.List
-import java.util.HashMap
-import java.util.UUID
+import sdu.mdsd.generator.IoTInheritanceUtil
 import sdu.mdsd.ioT.*
-import sdu.mdsd.generator.IoTInheritanceUtil;
-import javax.inject.Inject
+import sdu.mdsd.ioT.ExpressionRight
 
 /**
  * Generates code from your model files on save.
@@ -23,6 +26,7 @@ class IoTGenerator extends AbstractGenerator {
 
 	Device currentDevice;
 	Resource _resource
+	HashSet<String> criticalSection
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		// var model = resource.allContents.filter(Model).toList
@@ -44,30 +48,29 @@ class IoTGenerator extends AbstractGenerator {
 		return names
 	}
 
-	
 	@Inject extension IoTInheritanceUtil
+	@Inject extension ThreadSafetyHelper
 
-	def getWifiStatement(Device d){
-		if (d.program.wifiDeclaration !== null){
+	def getWifiStatement(Device d) {
+		if (d.program.wifiDeclaration !== null) {
 			return d.program.wifiDeclaration
-		} else if (d.parentDevice?.program.wifiDeclaration !== null){
+		} else if (d.parentDevice?.program.wifiDeclaration !== null) {
 			return d.parentDevice.program.wifiDeclaration
 		} else {
 			return null
 		}
 	}
-	
-	def getListenStatement(Device d){
-		if (d.program.listenDeclaration !== null){
+
+	def getListenStatement(Device d) {
+		if (d.program?.listenDeclaration !== null) {
 			return d.program.listenDeclaration
-		} else if (d.parentDevice?.program.listenDeclaration !== null){
+		} else if (d.parentDevice?.program?.listenDeclaration !== null) {
 			return d.parentDevice.program.listenDeclaration
 		} else {
 			return null
 		}
 	}
-	
-	
+
 	def dispatch convDevice(IoTDevice device) {
 		currentDevice = device;
 		var varMap = device.makeVarMap
@@ -76,10 +79,10 @@ class IoTGenerator extends AbstractGenerator {
 		var connectDeclarationsMap = device.makeConnectionsMap
 		var listenDeclaration = device.listenStatement
 		var sensorInits = device.eResource.allContents.filter(SENSOR).toList.convertSensorInitCode
-
+		criticalSection = device.findCritcalSections
 		// Used to detect which device to send commands to
 		var sendToCommands = device.eAllContents.filter(SendCommand).toMap([T|T.target.name], [V|V])
-		
+
 		var string = '''
 			import pycom
 			import time
@@ -130,6 +133,7 @@ class IoTGenerator extends AbstractGenerator {
 			
 		'''
 		currentDevice = null;
+		criticalSection = null
 		return string
 	}
 
@@ -189,7 +193,6 @@ class IoTGenerator extends AbstractGenerator {
 		} else
 			''''''
 	}
-	
 
 	def String convertSleepTime(Loop loop) {
 		if (loop.timeVal === null) {
@@ -278,11 +281,23 @@ class IoTGenerator extends AbstractGenerator {
 		switch (right) {
 			SendCommand:
 				right.target.sendToDevice
-			AddToList: '''«right.list.name».append(value)'''
-			ToVar: '''
+			AddToList: {
+			System.out.println("CS: " + criticalSection + "LIST: " + right.list.name)
+			if (criticalSection?.contains(right.list.name)){
+			'''with _lock_«right.list.name»:
+	«right.list.name».append(value)'''} else {
+				'''«right.list.name».append(value)'''}}
+			ToVar: if (criticalSection?.contains(right.variable.name)){
+			'''with _lock_«right.variable.name»:
+	global «right.variable.name»
+	«right.variable.name» = value
+			'''
+			} else {
+			'''
 				global «right.variable.name»
 				«right.variable.name» = value
 			'''
+			}
 			ExternalRight: '''externals.«right.method.name»(value)'''
 			Block: {
 				var commands = ""
@@ -299,9 +314,7 @@ class IoTGenerator extends AbstractGenerator {
 	def getSendToDevice(Device targetDevice) {
 
 		var connectionList = this.currentDevice.program.connectDeclarations.filter([device == targetDevice]).toList
-		var connection = connectionList.length > 0
-				? connectionList.get(0)
-				: targetDevice.program.listenDeclaration
+		var connection = connectionList.length > 0 ? connectionList.get(0) : targetDevice.program.listenDeclaration
 		connection = connection === null ? targetDevice.listenStatement : connection
 
 		switch (connection) {
@@ -340,11 +353,14 @@ class IoTGenerator extends AbstractGenerator {
 			IntExpression: '''return «left.convVariableValue»'''
 		}
 	}
+	
+	
 
 	def CharSequence readFromDevice(Device sourceDevice) {
 		var connectionList = this.currentDevice.program.connectDeclarations.filter([device == sourceDevice]).toList
-		var connection = connectionList.length > 0 ? connectionList.get(0) : throw new Exception(
-				"A connection to the device not found")
+		var connection = connectionList.length > 0
+				? connectionList.get(0)
+				: throw new Exception("A connection to the device not found")
 		switch (currentDevice) {
 			IoTDevice: {
 				if (connection.configuration.type == "WLAN") {
@@ -387,7 +403,7 @@ class IoTGenerator extends AbstractGenerator {
 		var varMap = device.makeVarMap
 		var loopMap = device.makeLoopMap
 		var connectDeclarationsMap = device.makeConnectionsMap
-		
+		criticalSection = findCritcalSections(device)
 		// Used to detect which device to send commands to
 		var sendToCommands = device.eAllContents.filter(SendCommand).toMap([T|T.target.name], [V|V])
 
@@ -400,6 +416,11 @@ class IoTGenerator extends AbstractGenerator {
 			
 			
 			# Initializer
+			«IF (criticalSection.size > 0)»
+			«FOR cs : criticalSection»
+				_lock_«cs» = _thread.allocate_lock()
+			«ENDFOR»
+			«ENDIF»
 			
 			«IF (getExternals(device).length > 0)»
 				# You need to declare and implement: «FOR moduleName : getExternals(device) SEPARATOR(',')» «moduleName» «ENDFOR»
@@ -412,9 +433,9 @@ class IoTGenerator extends AbstractGenerator {
 			
 			«FOR sendToCommand : sendToCommands.values»
 				«IF sendToCommand.target.program.listenDeclaration !== null»
-				socket«sendToCommand.target.name» = socket.socket()
-				socket«sendToCommand.target.name».setblocking(True)
-				socket«sendToCommand.target.name».connect(('«sendToCommand.target.program.listenDeclaration.ip»', «sendToCommand.target.program.listenDeclaration.port»))
+					socket«sendToCommand.target.name» = socket.socket()
+					socket«sendToCommand.target.name».setblocking(True)
+					socket«sendToCommand.target.name».connect(('«sendToCommand.target.program.listenDeclaration.ip»', «sendToCommand.target.program.listenDeclaration.port»))
 				«ENDIF»
 			«ENDFOR»
 			
@@ -434,54 +455,55 @@ class IoTGenerator extends AbstractGenerator {
 				time.sleep(100)
 		'''
 		currentDevice = null;
+		criticalSection = null
 		return string
 	}
-	
+
 	def String insertSocketCode(ListenDeclaration listenDeclaration) {
 		'''
-		«IF listenDeclaration !== null»
-						server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-						print('Socket created')				
-						
-						# Bind socket to local host and port
-						try:
-						    server.bind(('«listenDeclaration.ip»', «listenDeclaration.port»))
-						    
-						except socket.error as msg:
-						    print('Bind failed. Error Code : ' + msg + ' Message ' + str(msg))
-						    sys.exit()
-						
-						server.listen(10)
-						input = [server, ]  # a list of all connections we want to check for data
-						# each time we call select.select()
-						
-						def run_server():
-						    inputready, outputready, exceptready = select.select(input, [], [])
-						
-						    for s in inputready:  # check each socket that select() said has available data
-						
-						        if s == server:  # if select returns our server socket, there is a new
-						                        # remote socket trying to connect
-						            client, address = server.accept()
-						            # add it to the socket list so we can check it now
-						            input.append(client)
-						            print('new client added%s' % str(address))
-						
-						        else:
-						            # select has indicated that these sockets have data available to recv
-						            data = s.recv(1024)
-						            if data:
-						                value = str(data) # read data
-						                value = value[2:-1] # remove b'...'
-						                
-						                «listenDeclaration.body.convExpRight»
-						                 
-						def th_func_socket(action):
-							while True:
-								action()
-						
-						_thread.start_new_thread(th_func_socket, (run_server,))
-					«ENDIF»
+			«IF listenDeclaration !== null»
+				server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				print('Socket created')				
+				
+				# Bind socket to local host and port
+				try:
+				    server.bind(('«listenDeclaration.ip»', «listenDeclaration.port»))
+				    
+				except socket.error as msg:
+				    print('Bind failed. Error Code : ' + msg + ' Message ' + str(msg))
+				    sys.exit()
+				
+				server.listen(10)
+				input = [server, ]  # a list of all connections we want to check for data
+				# each time we call select.select()
+				
+				def run_server():
+				    inputready, outputready, exceptready = select.select(input, [], [])
+				
+				    for s in inputready:  # check each socket that select() said has available data
+				
+				        if s == server:  # if select returns our server socket, there is a new
+				                        # remote socket trying to connect
+				            client, address = server.accept()
+				            # add it to the socket list so we can check it now
+				            input.append(client)
+				            print('new client added%s' % str(address))
+				
+				        else:
+				            # select has indicated that these sockets have data available to recv
+				            data = s.recv(1024)
+				            if data:
+				                value = str(data) # read data
+				                value = value[2:-1] # remove b'...'
+				                
+				                «listenDeclaration.body.convExpRight»
+				                 
+				def th_func_socket(action):
+					while True:
+						action()
+				
+				_thread.start_new_thread(th_func_socket, (run_server,))
+						«ENDIF»
 			'''
 	}
 

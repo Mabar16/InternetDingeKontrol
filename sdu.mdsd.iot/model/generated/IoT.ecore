@@ -49,7 +49,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="WifiDeclaration" eSuperTypes="#//NamedElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="connectionConfig" eType="#//ConnectionConfig"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ConnectDeclaration" eSuperTypes="#//NamedElement #//NamedDeclaration">
+  <eClassifiers xsi:type="ecore:EClass" name="ConnectDeclaration" eSuperTypes="#//NamedElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="device" eType="#//Device"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="address" eType="#//Address"
         containment="true"/>

@@ -16,10 +16,22 @@ abstract controller device con1{
 
 controller device con2 extends con1{
 	
-	override listen on 1.1.1.1:80 -> add to bobby
-		
-	override hello every 1 MINUTES{
-		
+	var huxx
+	var huxx2
+	override listen on 1.1.1.1:80 -> {
+		2 -> add to bobby
+		3 -> add to bobby
+		}
+	override hello every 2 MINUTES{
+		2 -> add to bobby
+	}
+	
+	hello2 every 22 MINUTES{
+		33 -> to huxx
+	}
+	
+	hello3 every 2 MINUTES{
+		22 -> to huxx
 	}
 }
 
@@ -28,6 +40,10 @@ abstract iot device fake{
 	list lux
 	
 	lu every 100 MILLISECONDS{
+		read from TEMPERATURE -> add to lux
+	}
+	
+	lula every 100 MILLISECONDS{
 		read from TEMPERATURE -> add to lux
 	}
 	

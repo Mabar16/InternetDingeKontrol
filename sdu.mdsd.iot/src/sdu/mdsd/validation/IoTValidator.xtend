@@ -129,7 +129,7 @@ class IoTValidator extends AbstractIoTValidator {
 		checkNoDuplicateElements(m.devices, "devices")
 		checkNoDuplicateElements(m.configs, "configs")
 	}
-	
+
 	
 	//Check duplicate inherited element
 	
