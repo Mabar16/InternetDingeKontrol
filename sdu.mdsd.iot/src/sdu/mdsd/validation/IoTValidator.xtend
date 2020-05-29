@@ -3,7 +3,7 @@
  */
 package sdu.mdsd.validation
 
-import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+
 import org.eclipse.xtext.validation.Check
 import sdu.mdsd.ioT.Device
 import javax.inject.Inject
@@ -15,12 +15,11 @@ import com.google.common.collect.HashMultimap
 import sdu.mdsd.ioT.Model
 import sdu.mdsd.ioT.NamedElement
 import sdu.mdsd.generator.IoTModelUtil
-import sdu.mdsd.ioT.Variable
 import sdu.mdsd.ioT.Loop
 import sdu.mdsd.generator.IoTInheritanceUtil
 import sdu.mdsd.ioT.VarOrList
-import sdu.mdsd.ioT.ExternalDeclaration
 import java.util.HashSet
+import sdu.mdsd.ioT.ListenDeclaration
 
 /**
  * This class contains custom validation rules. 
@@ -74,6 +73,21 @@ class IoTValidator extends AbstractIoTValidator {
 			}
 		}
 
+	}
+	
+	@Check def checkLegalListenOverride(ListenDeclaration listen){
+		val d = getContainingDevice(listen)
+		val parent = d.getParentDevice
+		
+		if (parent === null){
+			if (listen.override !== null)
+				error(NO_SUPER_OVERRIDE, listen, IoTPackage.eINSTANCE.listenDeclaration_Ip, WRONG_METHOD_OVERRIDE)
+		} else if (parent.program.listenDeclaration !== null && listen.override === null){
+			error("Super already implements a listen declaration. Override using 'override' keyword",
+				listen, IoTPackage.eINSTANCE.listenDeclaration_Ip, WRONG_METHOD_OVERRIDE)
+		} else if (parent.program.listenDeclaration === null && listen.override !== null){
+			error("Override cannot be used, as super does not implement a listen declaration",listen, IoTPackage.eINSTANCE.listenDeclaration_Ip, WRONG_METHOD_OVERRIDE)
+		}
 	}
 	
 	@Check def duplicateNameForInheritedVariables(VarOrList v) {

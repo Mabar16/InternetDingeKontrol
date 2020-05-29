@@ -9,17 +9,8 @@ import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
 import java.util.List
 import java.util.HashMap
-import sdu.mdsd.ioT.*
-import java.util.ArrayList
-import sdu.mdsd.ioT.ExpressionLeft
-import sdu.mdsd.ioT.ExpressionRight
-import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock
-import sdu.mdsd.ioT.SENSOR
 import java.util.UUID
-import sdu.mdsd.ioT.Device
-import sdu.mdsd.services.IoTGrammarAccess.SendCommandElements
-import java.util.Map
-import sdu.mdsd.ioT.Loop
+import sdu.mdsd.ioT.*
 import sdu.mdsd.generator.IoTInheritanceUtil;
 import javax.inject.Inject
 
@@ -311,6 +302,7 @@ class IoTGenerator extends AbstractGenerator {
 		var connection = connectionList.length > 0
 				? connectionList.get(0)
 				: targetDevice.program.listenDeclaration
+		connection = connection === null ? targetDevice.listenStatement : connection
 
 		switch (connection) {
 			ConnectDeclaration: {
