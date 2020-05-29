@@ -32,7 +32,7 @@ class IoTScopeProvider extends AbstractIoTScopeProvider {
 		}
 		return super.getScope(context, ref)
 	}
-	
+	/*
 	def getScopeForVar(EObject context) {
 		if (context instanceof ExpressionRight){
 			//val add = context as AddToList
@@ -41,4 +41,5 @@ class IoTScopeProvider extends AbstractIoTScopeProvider {
 		}
 		return IScope.NULLSCOPE
 	}
+	 */
 }

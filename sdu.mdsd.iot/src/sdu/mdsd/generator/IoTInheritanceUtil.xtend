@@ -6,7 +6,8 @@ import sdu.mdsd.ioT.Device
 import sdu.mdsd.ioT.IoTDevice
 import sdu.mdsd.ioT.Loop
 import sdu.mdsd.ioT.VarOrList
-import sdu.mdsd.ioT.ConnectStatement
+import sdu.mdsd.ioT.ConnectDeclaration
+import sdu.mdsd.ioT.ListenDeclaration
 
 class IoTInheritanceUtil {
 	def inheritLoopsFromParents(Device d){
@@ -31,10 +32,10 @@ class IoTInheritanceUtil {
 	}
 	
 	def inheritConnectionsFromParents(Device d){
-		var conMap = new HashMap<String, ConnectStatement>()
+		var conMap = new HashMap<String, ConnectDeclaration>()
 		val parent = d.getParentDevice
 		
-		for(c : parent.program.connectStatements){
+		for(c : parent.program.connectDeclarations){
 			conMap.put(c.name, c)
 		}		
 		return conMap
@@ -54,7 +55,7 @@ class IoTInheritanceUtil {
 	}
 	
 	def makeConnectionsMap(Device d) {
-		var conMap = d.getParentDevice === null ? new HashMap<String, ConnectStatement>() : d.inheritConnectionsFromParents;
+		var conMap = d.getParentDevice === null ? new HashMap<String, ConnectDeclaration>() : d.inheritConnectionsFromParents;
 		generateConnectionsMap(d, conMap)
 	}
 
@@ -71,8 +72,8 @@ class IoTInheritanceUtil {
 		return loopMap
 	}
 	
-	private def HashMap<String, ConnectStatement> generateConnectionsMap(Device d, HashMap<String, ConnectStatement> conMap) {
-		for(c : d.program.connectStatements){
+	private def HashMap<String, ConnectDeclaration> generateConnectionsMap(Device d, HashMap<String, ConnectDeclaration> conMap) {
+		for(c : d.program.connectDeclarations){
 			if (!conMap.containsKey(c.name)){
 				conMap.put(c.name, c)
 				}
@@ -82,8 +83,6 @@ class IoTInheritanceUtil {
 		}
 		return conMap
 	}
-	
-	
 	
 	def makeVarMap(Device d){
 		var varMap = d.getParentDevice === null ? new HashMap<String, VarOrList>() : d.inheritVariablesFromParents;

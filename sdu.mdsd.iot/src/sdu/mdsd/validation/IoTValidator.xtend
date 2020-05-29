@@ -19,6 +19,8 @@ import sdu.mdsd.ioT.Variable
 import sdu.mdsd.ioT.Loop
 import sdu.mdsd.generator.IoTInheritanceUtil
 import sdu.mdsd.ioT.VarOrList
+import sdu.mdsd.ioT.ExternalDeclaration
+import java.util.HashSet
 
 /**
  * This class contains custom validation rules. 
@@ -87,7 +89,16 @@ class IoTValidator extends AbstractIoTValidator {
 	}
 
 
-	
+	@Check def void checkNoDuplicateExternals(Model m){
+		val eSet = new HashSet<String>();
+		for (ext : m.externalDeclarations){
+			if (eSet.contains(ext.name))
+				error("External '" + ext.name + "' has already been declared.", ext, IoTPackage.eINSTANCE.namedElement_Name, DUPLICATE_ELEMENT)
+			else {
+				eSet.add(ext.name);
+			}
+		}
+	}
 
 
 	public static val UNUSED_ELEMENT = ISSUE_CODE_PREFIX + "UnusedElement"
@@ -95,15 +106,13 @@ class IoTValidator extends AbstractIoTValidator {
 
 	
 	@Check def void checkNoDuplicateVariables(Program p){
-		checkNoDuplicateElements(p.connectStatements, "variables")
+		checkNoDuplicateElements(p.connectDeclarations, "variables")
 		checkNoDuplicateElements(p.variables, "connect statements")
-		checkNoDuplicateElements(p.listenStatements, "listen statements")
 		checkNoDuplicateElements(p.loops, "loops")
 	}
 	
 	@Check def void checkNoDuplicateDeclarations(Model m){
 		checkNoDuplicateElements(m.devices, "devices")
-		checkNoDuplicateElements(m.externalDeclarations, "externals")
 		checkNoDuplicateElements(m.configs, "configs")
 	}
 	

@@ -57,10 +57,20 @@ class IoTGenerator extends AbstractGenerator {
 	@Inject extension IoTInheritanceUtil
 
 	def getWifiStatement(Device d){
-		if (d.program.wifiStatement !== null){
-			return d.program.wifiStatement
-		} else if (d.parentDevice?.program.wifiStatement !== null){
-			return d.parentDevice.program.wifiStatement
+		if (d.program.wifiDeclaration !== null){
+			return d.program.wifiDeclaration
+		} else if (d.parentDevice?.program.wifiDeclaration !== null){
+			return d.parentDevice.program.wifiDeclaration
+		} else {
+			return null
+		}
+	}
+	
+	def getListenStatement(Device d){
+		if (d.program.listenDeclaration !== null){
+			return d.program.listenDeclaration
+		} else if (d.parentDevice?.program.listenDeclaration !== null){
+			return d.parentDevice.program.listenDeclaration
 		} else {
 			return null
 		}
@@ -68,17 +78,16 @@ class IoTGenerator extends AbstractGenerator {
 	
 	
 	def dispatch convDevice(IoTDevice device) {
-		//currentDevice = device;
+		currentDevice = device;
 		var varMap = device.makeVarMap
 		var loopMap = device.makeLoopMap
-		var wifiStatement = device.getWifiStatement
-		var connectStatementsMap = device.makeConnectionsMap
-		
+		var wifiDeclaration = device.getWifiStatement
+		var connectDeclarationsMap = device.makeConnectionsMap
+		var listenDeclaration = device.listenStatement
 		var sensorInits = device.eResource.allContents.filter(SENSOR).toList.convertSensorInitCode
 
 		// Used to detect which device to send commands to
 		var sendToCommands = device.eAllContents.filter(SendCommand).toMap([T|T.target.name], [V|V])
-		var listenStatements = device.eAllContents.filter(ListenStatement).toList
 		
 		var string = '''
 			import pycom
@@ -98,20 +107,20 @@ class IoTGenerator extends AbstractGenerator {
 				pycom.heartbeat(False)
 			«ENDIF»
 			
-			«IF wifiStatement !== null»
-				«wifiStatement.convWifiStatement»
+			«IF wifiDeclaration !== null»
+				«wifiDeclaration.convWifiStatement»
 			«ENDIF»
 			
-			«FOR connectionStatement : connectStatementsMap.values»
-				«connectionStatement.convConfigurationIoT»	
+			«FOR connectDeclaration : connectDeclarationsMap.values»
+				«connectDeclaration.convConfigurationIoT»	
 				
 			«ENDFOR»
 			
 			«FOR sendToCommand : sendToCommands.values»
-				«IF sendToCommand.target.program.listenStatements.size > 0»
+				«IF sendToCommand.target.program.listenDeclaration !== null»
 					socket«sendToCommand.target.name» = socket.socket()
 					socket«sendToCommand.target.name».setblocking(True)
-					socket«sendToCommand.target.name».connect(('«sendToCommand.target.program.listenStatements.get(0).ip»', «sendToCommand.target.program.listenStatements.get(0).port»))
+					socket«sendToCommand.target.name».connect(('«sendToCommand.target.program.listenDeclaration.ip»', «sendToCommand.target.program.listenDeclaration.port»))
 				«ENDIF»
 			«ENDFOR»
 			
@@ -125,7 +134,7 @@ class IoTGenerator extends AbstractGenerator {
 				«l.convLoop»
 			«ENDFOR»
 			
-			«insertSocketCode(listenStatements)»
+			«insertSocketCode(listenDeclaration)»
 			
 			
 		'''
@@ -298,17 +307,17 @@ class IoTGenerator extends AbstractGenerator {
 
 	def getSendToDevice(Device targetDevice) {
 
-		var connectionList = this.currentDevice.program.connectStatements.filter([device == targetDevice]).toList
+		var connectionList = this.currentDevice.program.connectDeclarations.filter([device == targetDevice]).toList
 		var connection = connectionList.length > 0
 				? connectionList.get(0)
-				: targetDevice.eAllContents.filter(ListenStatement).toList.get(0)
+				: targetDevice.program.listenDeclaration
 
 		switch (connection) {
-			ConnectStatement: {
+			ConnectDeclaration: {
 				// Send over serial				
 				currentDevice.serialWrite(targetDevice)
 			}
-			ListenStatement: {
+			ListenDeclaration: {
 				// Send over wifi
 				return '''socket«targetDevice.name».send(bytes(str(value), "utf8"))'''
 			}
@@ -341,7 +350,7 @@ class IoTGenerator extends AbstractGenerator {
 	}
 
 	def CharSequence readFromDevice(Device sourceDevice) {
-		var connectionList = this.currentDevice.program.connectStatements.filter([device == sourceDevice]).toList
+		var connectionList = this.currentDevice.program.connectDeclarations.filter([device == sourceDevice]).toList
 		var connection = connectionList.length > 0 ? connectionList.get(0) : throw new Exception(
 				"A connection to the device not found")
 		switch (currentDevice) {
@@ -381,9 +390,11 @@ class IoTGenerator extends AbstractGenerator {
 	}
 
 	def dispatch convDevice(ControllerDevice device) {
+		currentDevice = device;
+		var listenDeclaration = device.listenStatement
 		var varMap = device.makeVarMap
 		var loopMap = device.makeLoopMap
-		var listenStatements = device.eAllContents.filter(ListenStatement).toList
+		var connectDeclarationsMap = device.makeConnectionsMap
 		
 		// Used to detect which device to send commands to
 		var sendToCommands = device.eAllContents.filter(SendCommand).toMap([T|T.target.name], [V|V])
@@ -403,15 +414,15 @@ class IoTGenerator extends AbstractGenerator {
 				import externals
 			«ENDIF»
 			
-			«FOR connectionStatement : device.program.connectStatements»
+			«FOR connectionStatement : connectDeclarationsMap.values»
 				«connectionStatement.convConfigurationController»
 			«ENDFOR»
 			
 			«FOR sendToCommand : sendToCommands.values»
-				«IF sendToCommand.target.program.listenStatements.size > 0»
+				«IF sendToCommand.target.program.listenDeclaration !== null»
 				socket«sendToCommand.target.name» = socket.socket()
 				socket«sendToCommand.target.name».setblocking(True)
-				socket«sendToCommand.target.name».connect(('«sendToCommand.target.program.listenStatements.get(0).ip»', «sendToCommand.target.program.listenStatements.get(0).port»))
+				socket«sendToCommand.target.name».connect(('«sendToCommand.target.program.listenDeclaration.ip»', «sendToCommand.target.program.listenDeclaration.port»))
 				«ENDIF»
 			«ENDFOR»
 			
@@ -424,7 +435,7 @@ class IoTGenerator extends AbstractGenerator {
 				«t.convLoop»
 			«ENDFOR»
 			
-			«insertSocketCode(listenStatements)»
+			«insertSocketCode(listenDeclaration)»
 			
 			# Do nothing forever, because the thread(s) started above would exit if this (main) thread exits.
 			while True:
@@ -434,15 +445,15 @@ class IoTGenerator extends AbstractGenerator {
 		return string
 	}
 	
-	def String insertSocketCode(List<ListenStatement> listenStatements) {
+	def String insertSocketCode(ListenDeclaration listenDeclaration) {
 		'''
-		«IF listenStatements.length > 0»
+		«IF listenDeclaration !== null»
 						server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 						print('Socket created')				
 						
 						# Bind socket to local host and port
 						try:
-						    server.bind(('«listenStatements.get(0).ip»', «listenStatements.get(0).port»))
+						    server.bind(('«listenDeclaration.ip»', «listenDeclaration.port»))
 						    
 						except socket.error as msg:
 						    print('Bind failed. Error Code : ' + msg + ' Message ' + str(msg))
@@ -471,7 +482,7 @@ class IoTGenerator extends AbstractGenerator {
 						                value = str(data) # read data
 						                value = value[2:-1] # remove b'...'
 						                
-						                «listenStatements.get(0).body.convExpRight»
+						                «listenDeclaration.body.convExpRight»
 						                 
 						def th_func_socket(action):
 							while True:
@@ -482,8 +493,8 @@ class IoTGenerator extends AbstractGenerator {
 			'''
 	}
 
-	def String convWifiStatement(WifiStatement statement) {
-		val map = getWlanIotValues(statement.connectionConfig.declarations)
+	def String convWifiStatement(WifiDeclaration wifi) {
+		val map = getWlanIotValues(wifi.connectionConfig.declarations)
 		'''
 			SSID = '«map.get('ssid')»'
 			KEY = '«map.get('password')»'
@@ -502,28 +513,28 @@ class IoTGenerator extends AbstractGenerator {
 		'''
 	}
 
-	def String convConfigurationIoT(ConnectStatement statement) {
-		var configuration = statement.configuration
+	def String convConfigurationIoT(ConnectDeclaration conn) {
+		var configuration = conn.configuration
 		switch configuration.type {
 			case 'SERIAL': {
 				var map = getSerialIotValues(configuration.declarations)
 				'''
-					uart = UART(«statement.address.value»)
+					uart = UART(«conn.address.value»)
 					uart.init(«map.get('baudrate')», bits=«map.get('bits')», parity=«map.get('parity')», stop=«map.get('stopbit')»)
 				'''
 			}
 			default:
-				throw new Exception(statement.class.toString + " unexpected for method convConfigurationIoT.")
+				throw new Exception(conn.class.toString + " unexpected for method convConfigurationIoT.")
 		}
 	}
 
-	def String convConfigurationController(ConnectStatement statement) {
-		var map = getSerialControllerValues(statement.configuration.declarations)
-		switch statement.configuration.type {
+	def String convConfigurationController(ConnectDeclaration conn) {
+		var map = getSerialControllerValues(conn.configuration.declarations)
+		switch conn.configuration.type {
 			case 'SERIAL': {
 				'''
-					serial«statement.device.name»= serial.Serial(
-					    port='«statement.address.value»',
+					serial«conn.device.name»= serial.Serial(
+					    port='«conn.address.value»',
 					    baudrate=«map.get('baudrate')»,
 					    parity=«map.get('parity')»,
 					    stopbits=«map.get('stopbit')»,

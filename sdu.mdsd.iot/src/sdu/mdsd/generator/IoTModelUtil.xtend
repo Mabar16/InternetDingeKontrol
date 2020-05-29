@@ -4,6 +4,7 @@ import sdu.mdsd.ioT.Device
 import sdu.mdsd.ioT.NamedDeclaration
 import org.eclipse.emf.ecore.EObject
 import javax.inject.Inject
+import sdu.mdsd.ioT.Model
 
 class IoTModelUtil {
 	
@@ -29,6 +30,14 @@ class IoTModelUtil {
 			return o.eContainer as Device
 		} else {
 			return o.eContainer.getContainingDevice
+		}
+	}
+	
+	def Model getModel(EObject o){
+		if (o.eContainer instanceof Model){
+			return o.eContainer as Model
+		} else {
+			return o.eContainer.getModel
 		}
 	}
     

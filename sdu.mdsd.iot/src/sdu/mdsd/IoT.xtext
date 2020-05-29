@@ -17,11 +17,11 @@ ExternalDeclaration:
 ;
 
 NamedElement:
-	Config | Device | VarOrList | Loop | WifiStatement | ListenStatement | ConnectStatement
+	Config | Device | VarOrList | Loop | WifiDeclaration | ConnectDeclaration | ExternalDeclaration
 ;
 
 NamedDeclaration:
-	VarOrList | Loop | ConnectStatement
+	VarOrList | Loop | ConnectDeclaration
 ;
 
 /*
@@ -72,23 +72,23 @@ IoTDevice returns Device:
 ;
 
 Program:
-	{Program} (wifiStatement=WifiStatement)?
-	connectStatements+=ConnectStatement*
+	{Program} (wifiDeclaration=WifiDeclaration)?
+	connectDeclarations+=ConnectDeclaration*
 	variables+=VarOrList*
-	listenStatements+=ListenStatement*
+	listenDeclaration=ListenDeclaration?
 	loops+=Loop*
 ;
 
-ListenStatement:
-	(name=ID)? 'listen' 'on' ip=IP ':' port=INT '->' body=ExpressionRight
+ListenDeclaration:
+	(override='override')? 'listen' 'on' ip=IP ':' port=INT '->' body=ExpressionRight
 ;
 
-WifiStatement:
+WifiDeclaration:
 	(name=ID)? 'setup' connectionConfig=[ConnectionConfig]
 ;
 
-ConnectStatement:
-		name=ID 'connect' 'to' device=[Device] 'on' address=Address 'using' configuration=[ConnectionConfig]
+ConnectDeclaration:
+	name=ID 'connect' 'to' device=[Device] 'on' address=Address 'using' configuration=[ConnectionConfig]
 ;
 
 Address:

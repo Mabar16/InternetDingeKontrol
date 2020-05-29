@@ -9,9 +9,7 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="devices" upperBound="-1"
         eType="#//Device" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ExternalDeclaration">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExternalDeclaration" eSuperTypes="#//NamedElement"/>
   <eClassifiers xsi:type="ecore:EClass" name="NamedElement">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
@@ -30,27 +28,28 @@
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Program">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="wifiStatement" eType="#//WifiStatement"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="wifiDeclaration" eType="#//WifiDeclaration"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="connectStatements" upperBound="-1"
-        eType="#//ConnectStatement" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="connectDeclarations" upperBound="-1"
+        eType="#//ConnectDeclaration" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="variables" upperBound="-1"
         eType="#//VarOrList" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="listenStatements" upperBound="-1"
-        eType="#//ListenStatement" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="listenDeclaration" eType="#//ListenDeclaration"
+        containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="loops" upperBound="-1"
         eType="#//Loop" containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ListenStatement" eSuperTypes="#//NamedElement">
+  <eClassifiers xsi:type="ecore:EClass" name="ListenDeclaration">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="override" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="ip" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="port" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="body" eType="#//ExpressionRight"
         containment="true"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="WifiStatement" eSuperTypes="#//NamedElement">
+  <eClassifiers xsi:type="ecore:EClass" name="WifiDeclaration" eSuperTypes="#//NamedElement">
     <eStructuralFeatures xsi:type="ecore:EReference" name="connectionConfig" eType="#//ConnectionConfig"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="ConnectStatement" eSuperTypes="#//NamedElement #//NamedDeclaration">
+  <eClassifiers xsi:type="ecore:EClass" name="ConnectDeclaration" eSuperTypes="#//NamedElement #//NamedDeclaration">
     <eStructuralFeatures xsi:type="ecore:EReference" name="device" eType="#//Device"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="address" eType="#//Address"
         containment="true"/>
