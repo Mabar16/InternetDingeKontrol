@@ -61,7 +61,7 @@ class IoTGenerator extends AbstractGenerator {
 		}
 	}
 
-	def getListenStatement(Device d) {
+	def getListenDeclaration(Device d) {
 		if (d.program?.listenDeclaration !== null) {
 			return d.program.listenDeclaration
 		} else if (d.parentDevice?.program?.listenDeclaration !== null) {
@@ -77,7 +77,7 @@ class IoTGenerator extends AbstractGenerator {
 		var loopMap = device.makeLoopMap
 		var wifiDeclaration = device.getWifiStatement
 		var connectDeclarationsMap = device.makeConnectionsMap
-		var listenDeclaration = device.listenStatement
+		var listenDeclaration = device.listenDeclaration
 		var sensorInits = device.eResource.allContents.filter(SENSOR).toList.convertSensorInitCode
 		criticalSection = device.findCritcalSections
 		// Used to detect which device to send commands to
@@ -315,7 +315,7 @@ class IoTGenerator extends AbstractGenerator {
 
 		var connectionList = this.currentDevice.program.connectDeclarations.filter([device == targetDevice]).toList
 		var connection = connectionList.length > 0 ? connectionList.get(0) : targetDevice.program.listenDeclaration
-		connection = connection === null ? targetDevice.listenStatement : connection
+		connection = connection === null ? targetDevice.listenDeclaration : connection
 
 		switch (connection) {
 			ConnectDeclaration: {
@@ -342,7 +342,26 @@ class IoTGenerator extends AbstractGenerator {
 
 	def convExpLeft(ExpressionLeft left) {
 		switch (left) {
-			ReadVariable: '''return «left.value.name»'''
+			ReadVariable: {
+				if (criticalSection.contains(left.value.name)){
+					'''with _lock_«left.value.name»:
+	return «left.value.name»'''
+				} else {
+					
+			'''return «left.value.name»'''
+				}
+			
+			}
+			ReadList: {
+				if (criticalSection.contains(left.value.name)){
+					'''with _lock_«left.value.name»:
+	return «left.value.name»'''
+				} else {
+					
+			'''return «left.value.name»'''
+				}
+			
+			}
 			ReadSensor:
 				left.sensor.getReadSensorCode
 			ReadConnection: {
@@ -399,7 +418,7 @@ class IoTGenerator extends AbstractGenerator {
 
 	def dispatch convDevice(ControllerDevice device) {
 		currentDevice = device;
-		var listenDeclaration = device.listenStatement
+		var listenDeclaration = device.listenDeclaration
 		var varMap = device.makeVarMap
 		var loopMap = device.makeLoopMap
 		var connectDeclarationsMap = device.makeConnectionsMap

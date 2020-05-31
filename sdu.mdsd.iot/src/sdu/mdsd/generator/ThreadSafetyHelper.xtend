@@ -13,7 +13,7 @@ class ThreadSafetyHelper {
 	@Inject extension IoTGenerator
 	@Inject extension IoTInheritanceUtil
 	
-	private def getCommandsFromListenStatement(ListenDeclaration l){
+	private def getCommandsFromListenDeclaration(ListenDeclaration l){
 		if (l === null)
 			return new ArrayList<String>()
 		
@@ -98,7 +98,7 @@ class ThreadSafetyHelper {
 		var occurrences = new HashMap<String, Integer>()
 		
 		//Find all local variable/list mutations
-		val mutations = d.listenStatement.commandsFromListenStatement
+		val mutations = d.listenDeclaration.commandsFromListenDeclaration
 		mutations.addAll(d.criticalSectionsFromLoops)
 		System.out.println("MUT"+mutations)
 		
@@ -113,9 +113,8 @@ class ThreadSafetyHelper {
 		
 		//Include mutations inherited from parent
 		val p = d.getParentDevice
-		val pMutations = p.listenStatement.commandsFromListenStatement 
-		val pListMutations = p.eContents.filter(AddToList).map(add | add.list.name).toList 
-		pMutations.addAll(pListMutations)
+		val pMutations = p.listenDeclaration.commandsFromListenDeclaration
+		pMutations.addAll(p.criticalSectionsFromLoops)
 		System.out.println("PM:"+pMutations)
 		//Count inherited variable mutations
 		for (entry : pMutations){

@@ -80,6 +80,9 @@
   <eClassifiers xsi:type="ecore:EClass" name="IntExpression" eSuperTypes="#//Expression">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ReadList" eSuperTypes="#//ExpressionLeft">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//PyList"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ReadVariable" eSuperTypes="#//ExpressionLeft">
     <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//Variable"/>
   </eClassifiers>

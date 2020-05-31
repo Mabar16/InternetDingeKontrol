@@ -142,7 +142,7 @@ ArrowCommand returns Command:
 ;
 
 ExpressionLeft:
-	 ExternalOf | ReadSensor | ReadConnection | ReadVariable | Expression
+	 ExternalOf | ReadSensor | ReadConnection | ReadVariable | ReadList | Expression
 ;
 
 Expression:
@@ -155,6 +155,10 @@ BoolExpression:
 
 IntExpression:
 	value=INT
+;
+
+ReadList:
+	'read' 'list' value=[PyList]	
 ;
 
 ReadVariable:

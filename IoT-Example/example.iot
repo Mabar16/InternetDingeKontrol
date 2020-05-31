@@ -23,7 +23,7 @@ controller device con2 extends con1{
 		3 -> add to bobby
 		}
 	override hello every 2 MINUTES{
-		2 -> add to bobby
+		read var huxx -> add to bobby
 	}
 	
 	hello2 every 22 MINUTES{
