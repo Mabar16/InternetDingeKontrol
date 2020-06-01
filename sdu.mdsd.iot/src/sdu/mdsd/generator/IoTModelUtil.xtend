@@ -21,7 +21,7 @@ class IoTModelUtil {
 
 	}
 
-    def classHierarchyVariables(Device d){
+    def classHierarchyMembers(Device d){
     	d.classHierarchy.map[program.eAllContents.filter(NamedDeclaration).toList].flatten
     }
 	

@@ -24,7 +24,7 @@ class IoTScopeProvider extends AbstractIoTScopeProvider {
 		if (context instanceof ExpressionRight){
 			//val add = context as AddToList
 			val device = context.getContainingDevice
-			return Scopes.scopeFor(device.program.variables, Scopes.scopeFor(device.classHierarchyVariables, Scopes.scopeFor(device.getModel.devices)))
+			return Scopes.scopeFor(device.program.variables, Scopes.scopeFor(device.classHierarchyMembers, Scopes.scopeFor(device.getModel.devices)))
 		}
 		return super.getScope(context, ref)
 	}

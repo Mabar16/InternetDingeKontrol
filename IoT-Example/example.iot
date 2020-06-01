@@ -26,7 +26,7 @@ controller device con2 extends con1{
 		read var huxx -> add to bobby
 	}
 	
-	hello2 every 22 MINUTES{
+	huxx every 22 MINUTES{
 		33 -> to huxx
 	}
 	
