@@ -20,6 +20,7 @@ import sdu.mdsd.generator.IoTInheritanceUtil
 import sdu.mdsd.ioT.VarOrList
 import java.util.HashSet
 import sdu.mdsd.ioT.ListenDeclaration
+import sdu.mdsd.ioT.SendCommand
 
 /**
  * This class contains custom validation rules. 
@@ -44,8 +45,16 @@ class IoTValidator extends AbstractIoTValidator {
 		}
 	}
 	
+	@Check  def checkSendToTargetIsListeningForInput(SendCommand c){
+		if (c.target.listenDeclaration === null){
+			warning("'" + c.target.name + "' is not listening for input. Target device must listen on a port using 'listen on' keyword for WiFi communication",
+				c, IoTPackage.eINSTANCE.sendCommand_Target, ISSUE_CODE_PREFIX+"UndefinedEndpoint")
+			
+		}
+	}
+	
 	public static val WRONG_METHOD_OVERRIDE =  ISSUE_CODE_PREFIX + "WrongMethodOverride"
-	public static val NO_SUPER_OVERRIDE =  "Override cannot be used as this device does not inherit from an abstract device."	
+	public static val NO_SUPER_OVERRIDE =  "Override cannot be used as this device does not inherit from another device."	
 	
 	@Check def checkLegalOverrides(Loop loop) {
 		val d = getContainingDevice(loop)

@@ -20,6 +20,26 @@ class IoTModelUtil {
 		visited
 
 	}
+	
+		def getWifiStatement(Device d) {
+		if (d.program.wifiDeclaration !== null) {
+			return d.program.wifiDeclaration
+		} else if (d.parentDevice?.program.wifiDeclaration !== null) {
+			return d.parentDevice.program.wifiDeclaration
+		} else {
+			return null
+		}
+	}
+
+	def getListenDeclaration(Device d) {
+		if (d.program?.listenDeclaration !== null) {
+			return d.program?.listenDeclaration
+		} else if (d.parentDevice?.program?.listenDeclaration !== null) {
+			return d.parentDevice.program.listenDeclaration
+		} else {
+			return null
+		}
+	}
 
     def classHierarchyMembers(Device d){
     	d.classHierarchy.map[program.eAllContents.filter(NamedDeclaration).toList].flatten

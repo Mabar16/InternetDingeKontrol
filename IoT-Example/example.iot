@@ -1,66 +1,36 @@
 external median
-
-connectionConfig config1 {
+connectionConfig WifiConfiguration {
 	type:WLAN
 	'SSID':'internet'
 	'key':'passw0rd'
 }
 
-abstract controller device con1{
-	list bobby
-	listen on 1.1.1.1:80 -> add to bobby
-	hello every 1 MINUTES{
-		
-	}
+controller device Endpoint{
+	list data
+	listen on 1.1.1.1:80 -> add to data
 }
 
-controller device con2 extends con1{
+ iot device LightSampler{
+	setup WifiConfiguration
+	list values
+	var lux
+
 	
-	var huxx
-	var huxx2
-	override listen on 1.1.1.1:80 -> {
-		2 -> add to bobby
-		3 -> add to bobby
+	SampleLight every 1 SECONDS {
+	read from LIGHTSENSOR -> add to values
+	median of values -> to lux
+	read var lux -> send to Endpoint
+	}
+	
+	ClearList every 5 MINUTES {
+		clear values
+	}
+	
+	ToggleLight always {
+		if (lux > 100){
+			LED OFF
+		} else {
+			LED ON
 		}
-	override hello every 2 MINUTES{
-		read var huxx -> add to bobby
-	}
-	
-	huxx every 22 MINUTES{
-		33 -> to huxx
-	}
-	
-	hello3 every 2 MINUTES{
-		22 -> to huxx
 	}
 }
-
-abstract iot device fake{
-	setup config1
-	list lux
-	
-	lu every 100 MILLISECONDS{
-		read from TEMPERATURE -> add to lux
-	}
-	
-	lula every 100 MILLISECONDS{
-		read from TEMPERATURE -> add to lux
-	}
-	
-	lulu every 100 MILLISECONDS{
-		read from TEMPERATURE -> send to con2
-	}
-	
-}
-
-
-abstract iot device fake2 extends fake{
-	samplemp2 every 100 MILLISECONDS{
-		read from TEMPERATURE -> add to lux
-	}
-}
-
-iot device LSDev extends fake{		
-}
-
-

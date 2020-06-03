@@ -50,26 +50,7 @@ class IoTGenerator extends AbstractGenerator {
 
 	@Inject extension IoTInheritanceUtil
 	@Inject extension ThreadSafetyHelper
-
-	def getWifiStatement(Device d) {
-		if (d.program.wifiDeclaration !== null) {
-			return d.program.wifiDeclaration
-		} else if (d.parentDevice?.program.wifiDeclaration !== null) {
-			return d.parentDevice.program.wifiDeclaration
-		} else {
-			return null
-		}
-	}
-
-	def getListenDeclaration(Device d) {
-		if (d.program?.listenDeclaration !== null) {
-			return d.program.listenDeclaration
-		} else if (d.parentDevice?.program?.listenDeclaration !== null) {
-			return d.parentDevice.program.listenDeclaration
-		} else {
-			return null
-		}
-	}
+	@Inject extension IoTModelUtil
 
 	def dispatch convDevice(IoTDevice device) {
 		currentDevice = device;
