@@ -1,4 +1,3 @@
-external median
 connectionConfig WifiConfiguration {
 	type:WLAN
 	'SSID':'internet'
@@ -10,27 +9,29 @@ controller device Endpoint{
 	listen on 1.1.1.1:80 -> add to data
 }
 
- iot device LightSampler{
+abstract iot device TemplateDevice{
 	setup WifiConfiguration
-	list values
-	var lux
+	list lux
+	sample every 100 MILLISECONDS{
+	    read from LIGHTSENSOR -> add to lux
+	}
+	
+	transmit every 10 SECONDS{
+		read from LIGHTSENSOR -> add to lux
+		read list lux -> send to Endpoint
+	}
+}
 
+iot device LightSampler extends TemplateDevice{
 	
-	SampleLight every 1 SECONDS {
-	read from LIGHTSENSOR -> add to values
-	median of values -> to lux
-	read var lux -> send to Endpoint
+}
+
+iot device FastLightSampler extends TemplateDevice{
+	override sample every 10 MILLISECONDS{
+	    read from LIGHTSENSOR -> add to lux
 	}
 	
-	ClearList every 5 MINUTES {
-		clear values
-	}
-	
-	ToggleLight always {
-		if (lux > 100){
-			LED OFF
-		} else {
-			LED ON
-		}
+	sampl2e every 102 MILLISECONDS{
+	    read from LIGHTSENSOR -> add to lux
 	}
 }

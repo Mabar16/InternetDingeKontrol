@@ -60,9 +60,12 @@ class IoTGenerator extends AbstractGenerator {
 		var connectDeclarationsMap = device.makeConnectionsMap
 		var listenDeclaration = device.listenDeclaration
 		var sensorInits = device.eResource.allContents.filter(SENSOR).toList.convertSensorInitCode
-		criticalSection = device.findCritcalSections
+		criticalSection = device.findCritcalSections(loopMap)
 		// Used to detect which device to send commands to
 		var sendToCommands = device.eAllContents.filter(SendCommand).toMap([T|T.target.name], [V|V])
+		if (device.parent !== null){
+			sendToCommands.putAll(device.parent.eAllContents.filter(SendCommand).toMap([T|T.target.name], [V|V]))
+		}
 
 		var string = '''
 			import pycom
@@ -82,6 +85,12 @@ class IoTGenerator extends AbstractGenerator {
 				pycom.heartbeat(False)
 			«ENDIF»
 			
+			«IF (criticalSection.size > 0)»
+			«FOR cs : criticalSection»
+				_lock_«cs» = _thread.allocate_lock()
+			«ENDFOR»
+			«ENDIF»
+						
 			«IF wifiDeclaration !== null»
 				«wifiDeclaration.convWifiStatement»
 			«ENDIF»
@@ -92,7 +101,7 @@ class IoTGenerator extends AbstractGenerator {
 			«ENDFOR»
 			
 			«FOR sendToCommand : sendToCommands.values»
-				«IF sendToCommand.target.program.listenDeclaration !== null»
+				«IF sendToCommand.target.listenDeclaration !== null»
 					socket«sendToCommand.target.name» = socket.socket()
 					socket«sendToCommand.target.name».setblocking(True)
 					socket«sendToCommand.target.name».connect(('«sendToCommand.target.program.listenDeclaration.ip»', «sendToCommand.target.program.listenDeclaration.port»))
@@ -403,9 +412,12 @@ class IoTGenerator extends AbstractGenerator {
 		var varMap = device.makeVarMap
 		var loopMap = device.makeLoopMap
 		var connectDeclarationsMap = device.makeConnectionsMap
-		criticalSection = findCritcalSections(device)
+		criticalSection = device.findCritcalSections(loopMap)
 		// Used to detect which device to send commands to
 		var sendToCommands = device.eAllContents.filter(SendCommand).toMap([T|T.target.name], [V|V])
+		if (device.parent !== null){
+			sendToCommands.putAll(device.parent.eAllContents.filter(SendCommand).toMap([T|T.target.name], [V|V]))			
+		}
 
 		var string = '''
 			import serial
@@ -432,7 +444,7 @@ class IoTGenerator extends AbstractGenerator {
 			«ENDFOR»
 			
 			«FOR sendToCommand : sendToCommands.values»
-				«IF sendToCommand.target.program.listenDeclaration !== null»
+				«IF sendToCommand.target.listenDeclaration !== null»
 					socket«sendToCommand.target.name» = socket.socket()
 					socket«sendToCommand.target.name».setblocking(True)
 					socket«sendToCommand.target.name».connect(('«sendToCommand.target.program.listenDeclaration.ip»', «sendToCommand.target.program.listenDeclaration.port»))

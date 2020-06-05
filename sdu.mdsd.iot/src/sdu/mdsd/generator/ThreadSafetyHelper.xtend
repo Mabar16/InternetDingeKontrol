@@ -78,10 +78,10 @@ class ThreadSafetyHelper {
 		}
 	}
 
-	private def List<String> getCriticalSectionsFromLoops(Device d) {
+	private def List<String> getCriticalSectionsFromLoops(HashMap<String, Loop> loops) {
 		var names = new ArrayList<String>()
 
-		for (l : d.program.loops) {
+		for (l : loops.values) {
 			getSectionsFromLoop(l, names)
 		}
 
@@ -94,14 +94,13 @@ class ThreadSafetyHelper {
 		}
 	}
 
-	def HashSet<String> findCritcalSections(Device d) {
+	def HashSet<String> findCritcalSections(Device d, HashMap<String, Loop> loops) {
 		var names = new HashSet<String>()
 		var occurrences = new HashMap<String, Integer>()
 
 		// Find all local variable/list mutations
 		val mutations = d.listenDeclaration.commandsFromListenDeclaration
-		mutations.addAll(d.criticalSectionsFromLoops)
-		System.out.println("MUT" + mutations)
+		mutations.addAll(loops.criticalSectionsFromLoops)
 
 		// Count how often each variable is mutated
 		for (entry : mutations) {
@@ -110,25 +109,7 @@ class ThreadSafetyHelper {
 			} else {
 				occurrences.put(entry, occurrences.get(entry) + 1)
 			}
-		}
-
-		// Include mutations inherited from parent
-		val p = d.getParentDevice
-		if (p !== null) {
-
-			val pMutations = p.listenDeclaration.commandsFromListenDeclaration
-			pMutations.addAll(p.criticalSectionsFromLoops)
-			System.out.println("PM:" + pMutations)
-			// Count inherited variable mutations
-			for (entry : pMutations) {
-				if (!occurrences.containsKey(entry)) {
-					occurrences.put(entry, 1)
-				} else {
-					occurrences.put(entry, occurrences.get(entry) + 1)
-				}
-			}
-
-		}
+		} 
 		for (kvpair : occurrences.entrySet) {
 			if (kvpair.value > 1) {
 				names.add(kvpair.key)
